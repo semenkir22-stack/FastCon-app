@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FastCon Cyber Hub Omega</title>
+    <title>FastCon VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -100,6 +100,7 @@
             align-items: center;
             position: relative;
             overflow: hidden;
+            transition: all 0.4s ease;
         }
 
         .card::before {
@@ -214,11 +215,11 @@
         }
 
         .stats-number {
-            font-size: 38px;
+            font-size: 32px;
             font-weight: 900;
             color: var(--neon-cyan);
             text-shadow: var(--cyber-shadow);
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         .info-list {
@@ -250,6 +251,44 @@
             color: var(--neon-cyan);
             font-weight: 900;
             letter-spacing: 0.5px;
+        }
+
+        /* Таблица тарифов */
+        .price-list {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+            width: 100%;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .price-card {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-pink);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .price-val {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 8px var(--neon-pink);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .admin-section {
@@ -307,7 +346,7 @@
         <div class="card">
             <div class="stats-box">
                 <div class="stats-label">Пользователей онлайн</div>
-                <div class="stats-number">111 496+</div>
+                <div class="stats-number">Более 111к человек сейчас используют FastCon</div>
             </div>
         </div>
 
@@ -329,9 +368,32 @@
         <div class="card card-trial">
             <div class="stats-label" style="color: var(--neon-orange); margin-bottom: 12px;">Стоимость после периода</div>
             <div class="trial-desc" style="margin-bottom: 20px; font-size: 13px;">
-                Ознакомьтесь с нашими доступными тарифами и ценами на следующие периоды использования инфраструктуры.
+                Ознакомьтесь с ценами на дальнейшее использование инфраструктуры.
             </div>
-            <button class="cyber-btn" onclick="openTrial()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange);">Посмотреть тарифы</button>
+            <button id="pricesBtn" class="cyber-btn" onclick="togglePrices()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange); margin-bottom: 0;">Посмотреть тарифы</button>
+
+            <div id="priceList" class="price-list">
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">1 месяц</span>
+                    <span class="price-val">349 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">3 месяца (-11%)</span>
+                    <span class="price-val">899 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">6 месяцев (-22%)</span>
+                    <span class="price-val">1599 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">12 месяцев (-33%)</span>
+                    <span class="price-val">2799 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">24 месяца (-44%)</span>
+                    <span class="price-val">4599 RUB</span>
+                </div>
+            </div>
         </div>
 
         <div class="card">
@@ -411,6 +473,20 @@
         }
         animate();
 
+        // Появление/скрытие тарифов
+        function togglePrices() {
+            const priceList = document.getElementById('priceList');
+            const btn = document.getElementById('pricesBtn');
+            
+            if (priceList.style.display === 'flex') {
+                priceList.style.display = 'none';
+                btn.innerText = 'Посмотреть тарифы';
+            } else {
+                priceList.style.display = 'flex';
+                btn.innerText = 'Скрыть';
+            }
+        }
+
         // Открытие ссылки триала
         function openTrial() {
             tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
@@ -427,7 +503,7 @@
             if (pass === 'fastcon123') {
                 alert('⚡ Этот раздел еще не доделан!');
             } else {
-                alert('Неверный пароль.');
+                alert('Неверный пароль.Гуляй.');
             }
         }
     </script>
