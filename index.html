@@ -3,33 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика FastCon</title>
+    <title>FastCon VPN - Тарифы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --tg-theme-bg-color: #17212b;
+            --tg-theme-text-color: #f5f5f5;
+            --tg-theme-hint-color: #707579;
+            --tg-theme-button-color: #2b90ea;
+            --tg-theme-button-text-color: #ffffff;
+            --accent-gradient: linear-gradient(135deg, #6250e7 0%, #3a82f7 50%, #2bd5e2 100%);
+            --card-bg: rgba(255, 255, 255, 0.06);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tg-theme-bg-color, #17212b);
             color: var(--tg-theme-text-color, #f5f5f5);
             margin: 0;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Заголовок */
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(90deg, #a855f7, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #707579);
+            margin-top: 6px;
+        }
+
+        /* Карточка с тарифами */
+        .plans-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-theme-hint-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .plan-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s, background-color 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(58, 130, 247, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .plan-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .plan-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+            padding: 2px 8px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .plan-price {
+            font-size: 18px;
+            font-weight: 800;
+            color: #38c172;
+        }
+
+        /* Счетчик пользователей */
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 6px;
+        }
+
+        .stats-number {
+            font-size: 26px;
+            font-weight: 800;
+            color: #388af6;
+            margin-top: 4px;
+        }
+
+        .stats-label {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        /* Блок акции */
+        .promo-card {
+            background: var(--accent-gradient);
+            border-radius: 14px;
             padding: 20px;
             text-align: center;
+            color: #ffffff;
+            margin-top: 6px;
+            box-shadow: 0 10px 30px rgba(58, 130, 247, 0.3);
         }
-        .card {
-            background: var(--tg-theme-secondary-bg-color, #23303f);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
+
+        .promo-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 4px;
         }
-        h2 { color: var(--tg-theme-button-color, #388af6); }
-        .count { font-size: 32px; font-weight: bold; margin: 10px 0; }
-        .desc { color: var(--tg-theme-hint-color, #8e99a5); font-size: 14px; }
+
+        .promo-desc {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+
+        .promo-btn {
+            background-color: #ffffff;
+            color: #3a82f7;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .promo-btn:hover {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
-    <h2>FastCon VPN</h2>
-    <div class="card">
-        <div class="desc">Всего пользователей в сети</div>
-        <div class="count" id="userCount">111 496</div>
+
+    <div class="container">
+        <header>
+            <h1>FastCon VPN</h1>
+            <p>Стабильный и безопасный доступ в интернет</p>
+        </header>
+
+        <div class="plans-title">Выберите тарифный план</div>
+
+        <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="plan-card">
+            <div class="plan-info">
+                <span class="plan-name">1 месяц</span>
+            </div>
+            <span class="plan-price">349 RUB</span>
+        </a>
+
+        <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="plan-card">
+            <div class="plan-info">
+                <span class="plan-name">3 месяца</span>
+                <span class="plan-badge">Выгода 11% 🔥</span>
+            </div>
+            <span class="plan-price">899 RUB</span>
+        </a>
+
+        <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="plan-card">
+            <div class="plan-info">
+                <span class="plan-name">6 месяцев</span>
+                <span class="plan-badge">Выгода 22% 🔥</span>
+            </div>
+            <span class="plan-price">1599 RUB</span>
+        </a>
+
+        <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="plan-card">
+            <div class="plan-info">
+                <span class="plan-name">12 месяцев</span>
+                <span class="plan-badge">Выгода 33% 🔥</span>
+            </div>
+            <span class="plan-price">2799 RUB</span>
+        </a>
+
+        <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="plan-card">
+            <div class="plan-info">
+                <span class="plan-name">24 месяца</span>
+                <span class="plan-badge">Выгода 44% 🔥</span>
+            </div>
+            <span class="plan-price">4599 RUB</span>
+        </a>
+
+        <div class="stats-card">
+            <span class="stats-label">Этим VPN уже пользуются</span>
+            <div class="stats-number">111 496+ человек</div>
+        </div>
+
+        <div class="promo-card">
+            <div class="promo-title">⚡ Покупайте с выгодой</div>
+            <div class="promo-desc">Получите стабильный интернет по самой низкой цене</div>
+            <a href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" class="promo-btn">Подключить</a>
+        </div>
     </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+    </script>
 </body>
 </html>
