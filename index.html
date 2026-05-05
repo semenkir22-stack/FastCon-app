@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FastCon Cyber Hub</title>
+    <title>FastCon Cyber Hub Omega</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #050509;
+            --bg-color: #010103;
             --text-color: #ffffff;
             --neon-cyan: #00ffff;
-            --neon-purple: #9400d3;
+            --neon-purple: #8a2be2;
             --neon-pink: #ff0055;
-            --card-bg: rgba(18, 18, 30, 0.7);
-            --neon-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-            --pink-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            --neon-orange: #ff5500;
+            --neon-green: #00ff66;
+            --card-bg: rgba(8, 8, 14, 0.85);
+            --cyber-shadow: 0 0 35px rgba(0, 255, 255, 0.45);
+            --trial-shadow: 0 0 45px rgba(255, 0, 85, 0.6);
         }
 
         * {
@@ -33,11 +35,10 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            padding: 16px;
+            padding: 24px;
         }
 
-        /* Анимированный неоновый фон */
-        #bg-canvas {
+        #cmatrix {
             position: fixed;
             top: 0;
             left: 0;
@@ -47,48 +48,49 @@
             pointer-events: none;
         }
 
-        /* Контейнер контента поверх фона */
         #container {
             z-index: 1;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 24px;
         }
 
-        /* Шапка */
         .header {
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            margin-top: 15px;
+            margin-bottom: 8px;
         }
 
         .title {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 900;
-            letter-spacing: 1.5px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             color: var(--text-color);
-            text-shadow: var(--neon-shadow);
+            text-shadow: var(--cyber-shadow);
+            background: linear-gradient(90deg, #ffffff, #00ffff, #ff0055, #8a2be2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 5px;
             color: var(--neon-cyan);
-            margin-top: 4px;
+            margin-top: 8px;
+            text-shadow: 0 0 10px var(--neon-cyan);
         }
 
-        /* Карточки */
         .card {
             background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 22px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 12px 60px rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -102,187 +104,271 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-orange), var(--neon-purple), var(--neon-pink));
         }
 
-        /* Акцентная карточка (Триад) */
         .card-trial {
-            border: 1.5px solid var(--neon-pink);
-            box-shadow: var(--pink-shadow);
+            border: 3px solid var(--neon-pink);
+            box-shadow: var(--trial-shadow);
             text-align: center;
+            background: rgba(20, 10, 25, 0.85);
         }
 
         .trial-badge {
-            background: rgba(255, 0, 85, 0.15);
+            background: rgba(255, 0, 85, 0.25);
             color: var(--neon-pink);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 11px;
-            font-weight: 700;
+            border-radius: 24px;
+            padding: 8px 22px;
+            font-size: 12px;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 14px;
-            border: 1px solid var(--neon-pink);
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            border: 1.5px solid var(--neon-pink);
         }
 
         .trial-time {
-            font-size: 34px;
+            font-size: 42px;
             font-weight: 900;
             color: var(--text-color);
-            text-shadow: var(--pink-shadow);
-            margin-bottom: 8px;
+            text-shadow: var(--trial-shadow);
+            margin-bottom: 14px;
+            letter-spacing: 1px;
         }
 
         .trial-desc {
-            color: rgba(255, 255, 255, 0.65);
-            font-size: 13px;
-            line-height: 1.4;
-            margin-bottom: 22px;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 32px;
         }
 
         .cyber-btn {
             width: 100%;
-            background: linear-gradient(135deg, rgba(255, 0, 85, 0.2), rgba(255, 0, 85, 0.6));
-            border: 1.5px solid var(--neon-pink);
+            background: linear-gradient(135deg, rgba(255, 0, 85, 0.35), rgba(255, 0, 85, 0.9));
+            border: 2px solid var(--neon-pink);
             color: var(--text-color);
-            padding: 16px;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: 700;
+            padding: 20px;
+            border-radius: 42px;
+            font-size: 16px;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2.5px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            margin-bottom: 10px;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px var(--neon-pink);
+            border-color: var(--text-color);
         }
 
         .cyber-btn:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
         }
 
-        /* Статистика пользователей */
+        .secondary-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 6px;
+            transition: all 0.3s;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
         .stats-box {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 12px;
             text-align: center;
         }
 
         .stats-label {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--neon-purple);
-            font-weight: 700;
-            letter-spacing: 2px;
+            font-weight: 900;
+            letter-spacing: 4px;
             text-transform: uppercase;
         }
 
         .stats-number {
-            font-size: 28px;
+            font-size: 38px;
             font-weight: 900;
             color: var(--neon-cyan);
-            text-shadow: var(--neon-shadow);
-            letter-spacing: 0.5px;
+            text-shadow: var(--cyber-shadow);
+            letter-spacing: 2px;
         }
 
-        /* Информационные пункты */
         .info-list {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 6px;
+            gap: 16px;
         }
 
         .info-item {
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            padding: 14px 16px;
+            border-radius: 14px;
+            padding: 18px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3.5px solid var(--neon-cyan);
+            border-left: 5px solid var(--neon-cyan);
+            box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.08);
         }
 
         .info-item-title {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
         }
 
         .info-item-val {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--neon-cyan);
-            font-weight: 700;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        /* Форма входа для администратора */
+        .admin-section {
+            width: 100%;
+            margin-top: 10px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            text-align: center;
+        }
+
+        .admin-input:focus {
+            border-color: var(--neon-purple);
+        }
+
+        .warning-text {
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
+    <canvas id="cmatrix"></canvas>
 
     <div id="container">
         <div class="header">
             <h1 class="title">FastCon</h1>
-            <p class="subtitle">Secure Cyber Space</p>
+            <p class="subtitle">Omega Infrastructure</p>
         </div>
 
         <div class="card card-trial">
             <div class="trial-badge">★ Cyber Trial ★</div>
             <div class="trial-time">3 ДНЯ БЕСПЛАТНО</div>
             <div class="trial-desc">
-                Получите полный доступ к сети без ограничений скорости и блокировок
+                Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.
             </div>
             <button class="cyber-btn" onclick="openTrial()">Активировать</button>
+            <button class="secondary-btn" onclick="showReferralAlert()">Моя реферальная ссылка</button>
         </div>
 
         <div class="card">
             <div class="stats-box">
                 <div class="stats-label">Пользователей онлайн</div>
-                <div class="stats-number" id="statsCount">111 496+</div>
+                <div class="stats-number">111 496+</div>
             </div>
         </div>
 
         <div class="info-list">
             <div class="info-item">
-                <div class="info-item-title">Состояние узла</div>
-                <div class="info-item-val">ACTIVE</div>
+                <div class="info-item-title">Сегмент сети</div>
+                <div class="info-item-val">NODE-ACTIVE</div>
             </div>
             <div class="info-item" style="border-left-color: var(--neon-purple);">
-                <div class="info-item-title">Протокол</div>
-                <div class="info-item-val">V2RAY / VMESS</div>
+                <div class="info-item-title">Протокол доступа</div>
+                <div class="info-item-val">VLESS / VMESS</div>
             </div>
+            <div class="info-item" style="border-left-color: var(--neon-orange);">
+                <div class="info-item-title">Шифрование</div>
+                <div class="info-item-val">256-BIT</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stats-label" style="margin-bottom: 10px;">Вход для администратора</div>
+            <div class="admin-section">
+                <input type="password" id="adminPassword" class="admin-input" placeholder="Введите пароль">
+                <button class="secondary-btn" onclick="checkAdminPassword()">Войти</button>
+            </div>
+        </div>
+
+        <div class="warning-text">
+            Этот ресурс является переходником на сервис FastCon.
         </div>
     </div>
 
     <script>
-        // Инициализация WebApp
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.setHeaderColor('#050509');
-        tg.backgroundColor = '#050509';
+        tg.setHeaderColor('#010103');
+        tg.backgroundColor = '#010103';
 
-        // Анимация фона (абстрактные цифровые точки / звёзды)
-        const canvas = document.getElementById('bg-canvas');
+        // Анимация фона
+        const canvas = document.getElementById('cmatrix');
         const ctx = canvas.getContext('2d');
 
         let particlesArray = [];
-        function resizeCanvas() {
+        
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resize);
+        resize();
 
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
-                this.color = Math.random() > 0.5 ? '#00ffff' : '#ff0055';
+                this.size = Math.random() * 3.5;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.speedY = Math.random() * 0.8 - 0.4;
+                this.color = Math.random() > 0.6 ? '#00ffff' : (Math.random() > 0.5 ? '#ff0055' : '#00ff66');
             }
             update() {
                 this.x += this.speedX;
@@ -299,12 +385,12 @@
             }
         }
 
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 180; i++) {
             particlesArray.push(new Particle());
         }
 
         function animate() {
-            ctx.fillStyle = '#050509';
+            ctx.fillStyle = '#010103';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < particlesArray.length; i++) {
                 particlesArray[i].update();
@@ -314,9 +400,24 @@
         }
         animate();
 
-        // Действие кнопки
+        // Открытие ссылки триала
         function openTrial() {
             tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
+        }
+
+        // Показ заглушки реферальной ссылки
+        function showReferralAlert() {
+            alert('🛠 Раздел в разработке!\nСкоро здесь появится ваша реферальная ссылка.');
+        }
+
+        // Проверка пароля администратора
+        function checkAdminPassword() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'fastcon123') {
+                alert('⚡ Этот раздел еще не доделан!');
+            } else {
+                alert('Неверный пароль.');
+            }
         }
     </script>
 </body>
