@@ -57,6 +57,30 @@
             gap: 24px;
         }
 
+        .lang-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: -12px;
+            margin-top: 8px;
+        }
+
+        .lang-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         .header {
             text-align: center;
             margin-top: 15px;
@@ -326,15 +350,15 @@
     </style>
 </head>
 <body>
-    
-    <div style="position: relative; z-index: 2; width: 100%; max-width: 440px; display: flex; justify-content: flex-end; margin-bottom: -12px; margin-top: 8px;">
-        <select id="langSelect" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: #ffffff; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; outline: none; cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;" onchange="changeLanguage()">
+
+    <div class="lang-container">
+        <select id="langSelect" class="lang-select" onchange="changeLanguage()">
             <option value="ru">RU 🇷🇺</option>
             <option value="en">EN 🇬🇧</option>
             <option value="zh">ZH 🇨🇳</option>
         </select>
     </div>
-    
+
     <canvas id="cmatrix"></canvas>
 
     <div id="container">
@@ -424,7 +448,7 @@
     </div>
 
     <script>
-                const tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         tg.setHeaderColor('#010103');
@@ -516,8 +540,9 @@
             if (statsNumberEl) statsNumberEl.innerText = t.statsNumber;
 
             // Обновляем секцию тарифов
-            const pricesCardEl = document.querySelectorAll('.card-trial')[1];
-            if (pricesCardEl) {
+            const priceCards = document.querySelectorAll('.card-trial');
+            if (priceCards.length > 1) {
+                const pricesCardEl = priceCards[1];
                 const pLabel = pricesCardEl.querySelector('.stats-label');
                 if (pLabel) pLabel.innerText = t.pricesLabel;
 
@@ -534,110 +559,7 @@
                 }
             }
 
-            const referralLabelEl = document.querySelectorAll('.card')[2].querySelector('.stats-label');
-            if (referralLabelEl) referralLabelEl.innerText = t.referralLabel;
-
-            const referralBtnEl = document.querySelectorAll('.card')[2].querySelector('.secondary-btn');
-            if (referralBtnEl) referralBtnEl.innerText = t.referralBtn;
-
-            const adminLabelEl = document.querySelectorAll('.card')[3].querySelector('.stats-label');
-            if (adminLabelEl) adminLabelEl.innerText = t.adminLabel;
-
-            const adminBtnEl = document.querySelectorAll('.card')[3].querySelector('.secondary-btn');
-            if (adminBtnEl) adminBtnEl.innerText = t.adminBtn;
-
-            const warningTextEl = document.querySelector('.warning-text');
-            if (warningTextEl) warningTextEl.innerText = t.warningText;
-        }
-
-        // Анимация фона
-        const canvas = document.getElementById('cmatrix');
-        const ctx = canvas.getContext('2d');
-
-        let particlesArray = [];
-        
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3.5;
-                this.speedX = Math.random() * 0.8 - 0.4;
-                this.speedY = Math.random() * 0.8 - 0.4;
-                this.color = Math.random() > 0.6 ? '#00ffff' : (Math.random() > 0.5 ? '#ff0055' : '#00ff66');
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-
-                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
-                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 180; i++) {
-            particlesArray.push(new Particle());
-        }
-
-        function animate() {
-            ctx.fillStyle = '#010103';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // Появление/скрытие тарифов
-        function togglePrices() {
-            const priceList = document.getElementById('priceList');
-            const btn = document.getElementById('pricesBtn');
-            const lang = document.getElementById('langSelect').value;
-            const t = translations[lang];
-            
-            if (priceList.style.display === 'flex') {
-                priceList.style.display = 'none';
-                btn.innerText = t.pricesBtn;
-            } else {
-                priceList.style.display = 'flex';
-                btn.innerText = t.pricesBtnHide;
-            }
-        }
-
-        // Открытие ссылки триала
-        function openTrial() {
-            tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
-        }
-
-        // Показ заглушки реферальной ссылки
-        function showReferralAlert() {
-            alert('🛠 Раздел в разработке!\nСкоро здесь появится ваша реферальная ссылка.');
-        }
-
-        // Проверка пароля администратора
-        function checkAdminPassword() {
-            const pass = document.getElementById('adminPassword').value;
-            if (pass === 'fastcon123') {
-                alert('⚡ Этот раздел еще не доделан!');
-            } else {
-                alert('Неверный пароль.');
-            }
-        }
-
-        // Вызываем при запуске
-        changeLanguage();
-        
+            const cards = document.querySelectorAll('.card');
+            if (cards.length >= 3) {
+                const referralLabelEl = cards[2].querySelector('.stats-label');
+                if (
