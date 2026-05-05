@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FastCon VPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #010103;
+            --text-color: #ffffff;
+            --neon-cyan: #00ffff;
+            --neon-purple: #8a2be2;
+            --neon-pink: #ff0055;
+            --neon-orange: #ff5500;
+            --neon-green: #00ff66;
+            --card-bg: rgba(8, 8, 14, 0.85);
+            --cyber-shadow: 0 0 35px rgba(0, 255, 255, 0.45);
+            --trial-shadow: 0 0 45px rgba(255, 0, 85, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        #cmatrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #container {
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .lang-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: -12px;
+            margin-top: 8px;
+        }
+
+        .lang-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-color);
+            text-shadow: var(--cyber-shadow);
+            background: linear-gradient(90deg, #ffffff, #00ffff, #ff0055, #8a2be2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            margin-top: 8px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            line-height: 1.4;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 12px 60px rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-orange), var(--neon-purple), var(--neon-pink));
+        }
+
+        .card-trial {
+            border: 3px solid var(--neon-pink);
+            box-shadow: var(--trial-shadow);
+            text-align: center;
+            background: rgba(20, 10, 25, 0.85);
+        }
+
+        .trial-badge {
+            background: rgba(255, 0, 85, 0.25);
+            color: var(--neon-pink);
+            border-radius: 24px;
+            padding: 8px 22px;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            border: 1.5px solid var(--neon-pink);
+        }
+
+        .trial-time {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--text-color);
+            text-shadow: var(--trial-shadow);
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+
+        .trial-desc {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .cyber-btn {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 0, 85, 0.35), rgba(255, 0, 85, 0.9));
+            border: 2px solid var(--neon-pink);
+            color: var(--text-color);
+            padding: 20px;
+            border-radius: 42px;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            margin-bottom: 10px;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px var(--neon-pink);
+            border-color: var(--text-color);
+        }
+
+        .cyber-btn:active {
+            transform: scale(0.95);
+        }
+
+        .secondary-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 6px;
+            transition: all 0.3s;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .stats-box {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: var(--neon-purple);
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .stats-number {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            text-shadow: var(--cyber-shadow);
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        .info-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--neon-cyan);
+            box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.08);
+        }
+
+        .info-item-title {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .info-item-val {
+            font-size: 14px;
+            color: var(--neon-cyan);
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .price-list {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+            width: 100%;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .price-card {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid var(--neon-pink);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .price-val {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 8px var(--neon-pink);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .admin-section {
+            width: 100%;
+            margin-top: 10px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            text-align: center;
+        }
+
+        .warning-text {
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-container">
+        <select id="langSelect" class="lang-select" onchange="onLangChange()">
+            <option value="ru">RU 🇷🇺</option>
+            <option value="en" selected>EN 🇬🇧</option>
+            <option value="zh">ZH 🇨🇳</option>
+        </select>
+    </div>
+
+    <canvas id="cmatrix"></canvas>
+
+    <div id="container">
+        <div class="header">
+            <h1 class="title">FastCon</h1>
+            <p class="subtitle">THE BEST VPN SERVICE FOR BYPASSING RESTRICTIONS AND JAMMERS</p>
+        </div>
+
+        <div class="card card-trial">
+            <div class="trial-badge">⚡ FREE TRIAL PERIOD ⚡</div>
+            <div class="trial-time">3 DAYS FREE</div>
+            <div class="trial-desc">
+                Activate access to the high-speed infrastructure. Absolutely unlimited traffic without speed drops.
+            </div>
+            <button class="cyber-btn" onclick="openTrial()">Activate</button>
+        </div>
+
+        <div class="card">
+            <div class="stats-box">
+                <div class="stats-label">Users online</div>
+                <div class="stats-number">Over 100 thousand people are currently using FastCon VPN</div>
+            </div>
+        </div>
+
+        <div class="info-list">
+            <div class="info-item">
+                <div class="info-item-title">Сегмент сети</div>
+                <div class="info-item-val">NODE-ACTIVE</div>
+            </div>
+            <div class="info-item" style="border-left-color: var(--neon-purple);">
+                <div class="info-item-title">Protocol</div>
+                <div class="info-item-val">VLESS / VMESS</div>
+            </div>
+            <div class="info-item" style="border-left-color: var(--neon-orange);">
+                <div class="info-item-title">Encryption</div>
+                <div class="info-item-val">256-BIT</div>
+            </div>
+        </div>
+
+        <div class="card card-trial">
+            <div class="stats-label" style="color: var(--neon-orange); margin-bottom: 12px;">Price after the period</div>
+            <div class="trial-desc" style="margin-bottom: 20px; font-size: 13px;">
+                Check out the prices for further use of the infrastructure.
+            </div>
+            <button id="pricesBtn" class="cyber-btn" onclick="togglePrices()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange); margin-bottom: 0;">View prices</button>
+
+            <div id="priceList" class="price-list">
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">1 month</span>
+                    <span class="price-val">349 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">3 months (-11%)</span>
+                    <span class="price-val">899 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">6 months (-22%)</span>
+                    <span class="price-val">1599 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">12 months (-33%)</span>
+                    <span class="price-val">2799 RUB</span>
+                </div>
+                <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
+                    <span class="price-title">24 months (-44%)</span>
+                    <span class="price-val">4599 RUB</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="stats-label" style="margin-bottom: 10px;">Invite friends</div>
+            <button class="secondary-btn" onclick="showReferralAlert()">My referral link</button>
+        </div>
+
+        <div class="card">
+            <div class="stats-label" style="margin-bottom: 10px;">Administrator login</div>
+            <div class="admin-section">
+                <input type="password" id="adminPassword" class="admin-input" placeholder="Enter password">
+                <button class="secondary-btn" onclick="checkAdminPassword()">Log In</button>
+            </div>
+        </div>
+
+        <div class="warning-text">
+            This resource is a gateway to the FastCon service.
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#010103');
+        tg.backgroundColor = '#010103';
+
+        function onLangChange() {
+            const select = document.getElementById('langSelect');
+            const lang = select.value;
+            if (lang === 'ru') {
+                window.location.href = 'index.html';
+            } else if (lang === 'zh') {
+                window.location.href = 'zh.html';
+            }
+        }
+
+        // Анимация фона
+        const canvas = document.getElementById('cmatrix');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3.5;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.speedY = Math.random() * 0.8 - 0.4;
+                this.color = Math.random() > 0.6 ? '#00ffff' : (Math.random() > 0.5 ? '#ff0055' : '#00ff66');
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 180; i++) {
+            particlesArray.push(new Particle());
+        }
+
+        function animate() {
+            ctx.fillStyle = '#010103';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function togglePrices() {
+            const priceList = document.getElementById('priceList');
+            const btn = document.getElementById('pricesBtn');
+            
+            if (priceList.style.display === 'flex') {
+                priceList.style.display = 'none';
+                btn.innerText = 'View prices';
+            } else {
+                priceList.style.display = 'flex';
+                btn.innerText = 'Hide';
+            }
+        }
+
+        function openTrial() {
+            tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
+        }
+
+        function showReferralAlert() {
+            alert('🛠 Section in development!\nYour referral link will appear here soon.');
+        }
+
+        function checkAdminPassword() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'fastcon123') {
+                alert('⚡ This section is not finished yet!');
+            } else {
+                alert('Wrong password.');
+            }
+        }
+    </script>
+</body>
+</html>
