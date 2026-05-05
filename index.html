@@ -76,12 +76,16 @@
         }
 
         .subtitle {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 5px;
+            letter-spacing: 2px; /* Чуть меньше для длинного текста */
             color: var(--neon-cyan);
             margin-top: 8px;
             text-shadow: 0 0 10px var(--neon-cyan);
+            line-height: 1.4;
+            max-width: 320px; /* Чтобы текст не расползался */
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .card {
@@ -123,7 +127,7 @@
             font-size: 12px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 1.5px; /* Уменьшил, чтобы длинная фраза влезла */
             margin-bottom: 20px;
             border: 1.5px solid var(--neon-pink);
         }
@@ -248,7 +252,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Форма входа для администратора */
         .admin-section {
             width: 100%;
             margin-top: 10px;
@@ -271,10 +274,6 @@
             text-align: center;
         }
 
-        .admin-input:focus {
-            border-color: var(--neon-purple);
-        }
-
         .warning-text {
             text-align: center;
             font-size: 10px;
@@ -293,11 +292,11 @@
     <div id="container">
         <div class="header">
             <h1 class="title">FastCon</h1>
-            <p class="subtitle">Omega Infrastructure</p>
+            <p class="subtitle">ЛУЧШИЙ VPN-СЕРВИС ДЛЯ ОБХОДА БЛОКИРОВОК И ГЛУШИЛОК</p>
         </div>
 
         <div class="card card-trial">
-            <div class="trial-badge">★ Cyber Trial ★</div>
+            <div class="trial-badge">⚡ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ⚡</div>
             <div class="trial-time">3 ДНЯ БЕСПЛАТНО</div>
             <div class="trial-desc">
                 Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.
@@ -309,7 +308,7 @@
         <div class="card">
             <div class="stats-box">
                 <div class="stats-label">Пользователей онлайн</div>
-                <div class="stats-number">111 496+</div>
+                <div class="stats-number">100 000+</div>
             </div>
         </div>
 
@@ -416,7 +415,7 @@
             if (pass === 'fastcon123') {
                 alert('⚡ Этот раздел еще не доделан!');
             } else {
-                alert('Неверный пароль.');
+                alert('Неверный пароль. Гуляй.');
             }
         }
     </script>
