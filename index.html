@@ -406,7 +406,7 @@
             <div class="trial-desc" id="pricesDesc" style="margin-bottom: 20px; font-size: 13px;">
                 Ознакомьтесь с ценами на дальнейшее использование инфраструктуры.
             </div>
-            <button id="pricesBtn" class="cyber-btn" onclick="togglePrices()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange); margin-bottom: 0;">Посмотреть тарифы</button>
+            <button id="togglePricesBtn" class="cyber-btn" onclick="togglePrices()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange); margin-bottom: 0;">Посмотреть тарифы</button>
 
             <div id="priceList" class="price-list">
                 <div class="price-card" onclick="openTrial()" style="cursor: pointer;">
@@ -529,11 +529,14 @@
             document.getElementById('pricesLabel').innerText = t.pricesLabel;
             document.getElementById('pricesDesc').innerText = t.pricesDesc;
             
-            const pBtn = document.getElementById('pricesBtn');
-            if (pBtn.innerText.toLowerCase() === "посмотреть тарифы" || pBtn.innerText.toLowerCase() === "view prices" || pBtn.innerText.toLowerCase() === "查看价格") {
-                pBtn.innerText = t.pricesBtn;
-            } else {
+            // Корректная смена текста кнопки открытия/скрытия тарифов
+            const pBtn = document.getElementById('togglePricesBtn');
+            const priceList = document.getElementById('priceList');
+            
+            if (priceList.style.display === 'flex') {
                 pBtn.innerText = t.pricesBtnHide;
+            } else {
+                pBtn.innerText = t.pricesBtn;
             }
 
             document.getElementById('referralLabel').innerText = t.referralLabel;
@@ -556,6 +559,4 @@
         window.addEventListener('resize', resize);
         resize();
 
-        class Particle {
-            constructor() {
-                this.x 
+        class Particle 
