@@ -278,7 +278,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Таблица тарифов */
         .price-list {
             display: none;
             flex-direction: column;
@@ -352,8 +351,8 @@
 <body>
 
     <div class="lang-container">
-        <select id="langSelect" class="lang-select" onchange="changeLanguage()">
-            <option value="ru">RU 🇷🇺</option>
+        <select id="langSelect" class="lang-select" onchange="onLangChange()">
+            <option value="ru" selected>RU 🇷🇺</option>
             <option value="en">EN 🇬🇧</option>
             <option value="zh">ZH 🇨🇳</option>
         </select>
@@ -454,112 +453,98 @@
         tg.setHeaderColor('#010103');
         tg.backgroundColor = '#010103';
 
-        // Языковые переводы
-        const translations = {
-            ru: {
-                subtitle: "ЛУЧШИЙ VPN-СЕРВИС ДЛЯ ОБХОДА БЛОКИРОВОК И ГЛУШИЛОК",
-                trialBadge: "⚡ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ⚡",
-                trialTime: "3 ДНЯ БЕСПЛАТНО",
-                trialDesc: "Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.",
-                trialBtn: "Активировать",
-                statsLabel: "Пользователей онлайн",
-                statsNumber: "Более 100 тысяч человек сейчас используют FastCon VPN",
-                pricesLabel: "Стоимость после периода",
-                pricesDesc: "Ознакомьтесь с ценами на дальнейшее использование инфраструктуры.",
-                pricesBtn: "Посмотреть тарифы",
-                pricesBtnHide: "Скрыть",
-                referralLabel: "Приглашайте друзей",
-                referralBtn: "Моя реферальная ссылка",
-                adminLabel: "Вход для администратора",
-                adminBtn: "Войти",
-                warningText: "Этот ресурс является переходником на сервис FastCon."
-            },
-            en: {
-                subtitle: "THE BEST VPN SERVICE FOR BYPASSING RESTRICTIONS AND JAMMERS",
-                trialBadge: "⚡ FREE TRIAL PERIOD ⚡",
-                trialTime: "3 DAYS FREE",
-                trialDesc: "Activate access to the high-speed infrastructure. Absolutely unlimited traffic without speed drops.",
-                trialBtn: "Activate",
-                statsLabel: "Users online",
-                statsNumber: "Over 100 thousand people are currently using FastCon VPN",
-                pricesLabel: "Price after the period",
-                pricesDesc: "Check out the prices for further use of the infrastructure.",
-                pricesBtn: "View prices",
-                pricesBtnHide: "Hide",
-                referralLabel: "Invite friends",
-                referralBtn: "My referral link",
-                adminLabel: "Administrator login",
-                adminBtn: "Log In",
-                warningText: "This resource is a gateway to the FastCon service."
-            },
-            zh: {
-                subtitle: "绕过限制和干扰的最佳 VPN 服务",
-                trialBadge: "⚡ 免费试用期 ⚡",
-                trialTime: "3天免费",
-                trialDesc: "激活对高速基础设施的访问。绝对无限流量，不降低网速。",
-                trialBtn: "激活",
-                statsLabel: "在线用户",
-                statsNumber: "超过 10 万人正在使用 FastCon VPN",
-                pricesLabel: "期满后的价格",
-                pricesDesc: "查看基础设施进一步使用的价格。",
-                pricesBtn: "查看价格",
-                pricesBtnHide: "隐藏",
-                referralLabel: "邀请好友",
-                referralBtn: "我的推荐链接",
-                adminLabel: "管理员登录",
-                adminBtn: "登录",
-                warningText: "此资源是 FastCon 服务的网关。"
+        // Переключение файлов (в зависимости от выбранного языка)
+        function onLangChange() {
+            const select = document.getElementById('langSelect');
+            const lang = select.value;
+            if (lang === 'en') {
+                window.location.href = 'en.html';
+            } else if (lang === 'zh') {
+                window.location.href = 'zh.html';
             }
-        };
+        }
 
-        function changeLanguage() {
-            const lang = document.getElementById('langSelect').value;
-            const t = translations[lang];
+        // Анимация фона
+        const canvas = document.getElementById('cmatrix');
+        const ctx = canvas.getContext('2d');
 
-            const subtitleEl = document.querySelector('.header .subtitle');
-            if (subtitleEl) subtitleEl.innerText = t.subtitle;
+        let particlesArray = [];
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
-            const trialBadgeEl = document.querySelector('.card-trial .trial-badge');
-            if (trialBadgeEl) trialBadgeEl.innerText = t.trialBadge;
-
-            const trialTimeEl = document.querySelector('.card-trial .trial-time');
-            if (trialTimeEl) trialTimeEl.innerText = t.trialTime;
-
-            const trialDescEls = document.querySelectorAll('.card-trial .trial-desc');
-            if (trialDescEls.length > 0) trialDescEls[0].innerText = t.trialDesc;
-
-            const trialBtnEl = document.querySelector('.card-trial .cyber-btn');
-            if (trialBtnEl && trialBtnEl.getAttribute('onclick') === 'openTrial()') {
-                trialBtnEl.innerText = t.trialBtn;
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3.5;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.speedY = Math.random() * 0.8 - 0.4;
+                this.color = Math.random() > 0.6 ? '#00ffff' : (Math.random() > 0.5 ? '#ff0055' : '#00ff66');
             }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-            const statsLabelEl = document.querySelector('.stats-box .stats-label');
-            if (statsLabelEl) statsLabelEl.innerText = t.statsLabel;
-
-            const statsNumberEl = document.querySelector('.stats-box .stats-number');
-            if (statsNumberEl) statsNumberEl.innerText = t.statsNumber;
-
-            // Обновляем секцию тарифов
-            const priceCards = document.querySelectorAll('.card-trial');
-            if (priceCards.length > 1) {
-                const pricesCardEl = priceCards[1];
-                const pLabel = pricesCardEl.querySelector('.stats-label');
-                if (pLabel) pLabel.innerText = t.pricesLabel;
-
-                const pDesc = pricesCardEl.querySelector('.trial-desc');
-                if (pDesc) pDesc.innerText = t.pricesDesc;
-
-                const priceBtnEl = document.getElementById('pricesBtn');
-                if (priceBtnEl) {
-                    if (document.getElementById('priceList').style.display === 'flex') {
-                        priceBtnEl.innerText = t.pricesBtnHide;
-                    } else {
-                        priceBtnEl.innerText = t.pricesBtn;
-                    }
-                }
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
             }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-            const cards = document.querySelectorAll('.card');
-            if (cards.length >= 3) {
-                const referralLabelEl = cards[2].querySelector('.stats-label');
-                if (
+        for (let i = 0; i < 180; i++) {
+            particlesArray.push(new Particle());
+        }
+
+        function animate() {
+            ctx.fillStyle = '#010103';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function togglePrices() {
+            const priceList = document.getElementById('priceList');
+            const btn = document.getElementById('pricesBtn');
+            
+            if (priceList.style.display === 'flex') {
+                priceList.style.display = 'none';
+                btn.innerText = 'Посмотреть тарифы';
+            } else {
+                priceList.style.display = 'flex';
+                btn.innerText = 'Скрыть';
+            }
+        }
+
+        function openTrial() {
+            tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
+        }
+
+        function showReferralAlert() {
+            alert('🛠 Раздел в разработке!\nСкоро здесь появится ваша реферальная ссылка.');
+        }
+
+        function checkAdminPassword() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === 'fastcon123') {
+                alert('⚡ Этот раздел еще не доделан!');
+            } else {
+                alert('Неверный пароль.');
+            }
+        }
+    </script>
+</body>
+</html>
