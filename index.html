@@ -57,9 +57,36 @@
             gap: 24px;
         }
 
+        /* Верхняя панель с переключателем языка */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .lang-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .lang-select option {
+            background-color: #101018;
+            color: var(--text-color);
+        }
+
         .header {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 5px;
             margin-bottom: 8px;
         }
 
@@ -215,11 +242,12 @@
         }
 
         .stats-number {
-            font-size: 32px;
-            font-weight: 900;
+            font-size: 18px;
+            font-weight: 800;
             color: var(--neon-cyan);
             text-shadow: var(--cyber-shadow);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
         }
 
         .info-list {
@@ -329,24 +357,32 @@
     <canvas id="cmatrix"></canvas>
 
     <div id="container">
+        <div class="top-bar">
+            <select id="langSelect" class="lang-select" onchange="changeLanguage()">
+                <option value="ru">RU 🇷🇺</option>
+                <option value="en">EN 🇬🇧</option>
+                <option value="zh">ZH 🇨🇳</option>
+            </select>
+        </div>
+
         <div class="header">
             <h1 class="title">FastCon</h1>
-            <p class="subtitle">ЛУЧШИЙ VPN-СЕРВИС ДЛЯ ОБХОДА БЛОКИРОВОК И ГЛУШИЛОК</p>
+            <p class="subtitle" id="subtitleText">ЛУЧШИЙ VPN-СЕРВИС ДЛЯ ОБХОДА БЛОКИРОВОК И ГЛУШИЛОК</p>
         </div>
 
         <div class="card card-trial">
-            <div class="trial-badge">⚡ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ⚡</div>
-            <div class="trial-time">3 ДНЯ БЕСПЛАТНО</div>
-            <div class="trial-desc">
+            <div class="trial-badge" id="trialBadge">⚡ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ⚡</div>
+            <div class="trial-time" id="trialTime">3 ДНЯ БЕСПЛАТНО</div>
+            <div class="trial-desc" id="trialDesc">
                 Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.
             </div>
-            <button class="cyber-btn" onclick="openTrial()">Активировать</button>
+            <button class="cyber-btn" id="trialBtn" onclick="openTrial()">Активировать</button>
         </div>
 
         <div class="card">
             <div class="stats-box">
-                <div class="stats-label">Пользователей онлайн</div>
-                <div class="stats-number">Более 111к человек сейчас используют FastCon</div>
+                <div class="stats-label" id="statsLabel">Пользователей онлайн</div>
+                <div class="stats-number" id="statsNumber">Более 100 тысяч человек сейчас используют FastCon VPN</div>
             </div>
         </div>
 
@@ -366,8 +402,8 @@
         </div>
 
         <div class="card card-trial">
-            <div class="stats-label" style="color: var(--neon-orange); margin-bottom: 12px;">Стоимость после периода</div>
-            <div class="trial-desc" style="margin-bottom: 20px; font-size: 13px;">
+            <div class="stats-label" id="pricesLabel" style="color: var(--neon-orange); margin-bottom: 12px;">Стоимость после периода</div>
+            <div class="trial-desc" id="pricesDesc" style="margin-bottom: 20px; font-size: 13px;">
                 Ознакомьтесь с ценами на дальнейшее использование инфраструктуры.
             </div>
             <button id="pricesBtn" class="cyber-btn" onclick="togglePrices()" style="background: linear-gradient(135deg, rgba(255, 85, 0, 0.35), rgba(255, 85, 0, 0.9)); border-color: var(--neon-orange); margin-bottom: 0;">Посмотреть тарифы</button>
@@ -397,19 +433,19 @@
         </div>
 
         <div class="card">
-            <div class="stats-label" style="margin-bottom: 10px;">Приглашайте друзей</div>
-            <button class="secondary-btn" onclick="showReferralAlert()">Моя реферальная ссылка</button>
+            <div class="stats-label" id="referralLabel" style="margin-bottom: 10px;">Приглашайте друзей</div>
+            <button class="secondary-btn" id="referralBtn" onclick="showReferralAlert()">Моя реферальная ссылка</button>
         </div>
 
         <div class="card">
-            <div class="stats-label" style="margin-bottom: 10px;">Вход для администратора</div>
+            <div class="stats-label" id="adminLabel" style="margin-bottom: 10px;">Вход для администратора</div>
             <div class="admin-section">
                 <input type="password" id="adminPassword" class="admin-input" placeholder="Введите пароль">
-                <button class="secondary-btn" onclick="checkAdminPassword()">Войти</button>
+                <button class="secondary-btn" id="adminBtn" onclick="checkAdminPassword()">Войти</button>
             </div>
         </div>
 
-        <div class="warning-text">
+        <div class="warning-text" id="warningText">
             Этот ресурс является переходником на сервис FastCon.
         </div>
     </div>
@@ -420,6 +456,92 @@
         tg.expand();
         tg.setHeaderColor('#010103');
         tg.backgroundColor = '#010103';
+
+        // Языковые переводы
+        const translations = {
+            ru: {
+                subtitle: "ЛУЧШИЙ VPN-СЕРВИС ДЛЯ ОБХОДА БЛОКИРОВОК И ГЛУШИЛОК",
+                trialBadge: "⚡ БЕСПЛАТНЫЙ ПРОБНЫЙ ПЕРИОД ⚡",
+                trialTime: "3 ДНЯ БЕСПЛАТНО",
+                trialDesc: "Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.",
+                trialBtn: "Активировать",
+                statsLabel: "Пользователей онлайн",
+                statsNumber: "Более 100 тысяч человек сейчас используют FastCon VPN",
+                pricesLabel: "Стоимость после периода",
+                pricesDesc: "Ознакомьтесь с ценами на дальнейшее использование инфраструктуры.",
+                pricesBtn: "Посмотреть тарифы",
+                pricesBtnHide: "Скрыть",
+                referralLabel: "Приглашайте друзей",
+                referralBtn: "Моя реферальная ссылка",
+                adminLabel: "Вход для администратора",
+                adminBtn: "Войти",
+                warningText: "Этот ресурс является переходником на сервис FastCon."
+            },
+            en: {
+                subtitle: "THE BEST VPN SERVICE FOR BYPASSING RESTRICTIONS AND JAMMERS",
+                trialBadge: "⚡ FREE TRIAL PERIOD ⚡",
+                trialTime: "3 DAYS FREE",
+                trialDesc: "Activate access to the high-speed infrastructure. Absolutely unlimited traffic without speed drops.",
+                trialBtn: "Activate",
+                statsLabel: "Users online",
+                statsNumber: "Over 100 thousand people are currently using FastCon VPN",
+                pricesLabel: "Price after the period",
+                pricesDesc: "Check out the prices for further use of the infrastructure.",
+                pricesBtn: "View prices",
+                pricesBtnHide: "Hide",
+                referralLabel: "Invite friends",
+                referralBtn: "My referral link",
+                adminLabel: "Administrator login",
+                adminBtn: "Log In",
+                warningText: "This resource is a gateway to the FastCon service."
+            },
+            zh: {
+                subtitle: "绕过限制和干扰的最佳 VPN 服务",
+                trialBadge: "⚡ 免费试用期 ⚡",
+                trialTime: "3天免费",
+                trialDesc: "激活对高速基础设施的访问。绝对无限流量，不降低网速。",
+                trialBtn: "激活",
+                statsLabel: "在线用户",
+                statsNumber: "超过 10 万人正在使用 FastCon VPN",
+                pricesLabel: "期满后的价格",
+                pricesDesc: "查看基础设施进一步使用的价格。",
+                pricesBtn: "查看价格",
+                pricesBtnHide: "隐藏",
+                referralLabel: "邀请好友",
+                referralBtn: "我的推荐链接",
+                adminLabel: "管理员登录",
+                adminBtn: "登录",
+                warningText: "此资源是 FastCon 服务的网关。"
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('langSelect').value;
+            const t = translations[lang];
+
+            document.getElementById('subtitleText').innerText = t.subtitle;
+            document.getElementById('trialBadge').innerText = t.trialBadge;
+            document.getElementById('trialTime').innerText = t.trialTime;
+            document.getElementById('trialDesc').innerText = t.trialDesc;
+            document.getElementById('trialBtn').innerText = t.trialBtn;
+            document.getElementById('statsLabel').innerText = t.statsLabel;
+            document.getElementById('statsNumber').innerText = t.statsNumber;
+            document.getElementById('pricesLabel').innerText = t.pricesLabel;
+            document.getElementById('pricesDesc').innerText = t.pricesDesc;
+            
+            const pBtn = document.getElementById('pricesBtn');
+            if (pBtn.innerText.toLowerCase() === "посмотреть тарифы" || pBtn.innerText.toLowerCase() === "view prices" || pBtn.innerText.toLowerCase() === "查看价格") {
+                pBtn.innerText = t.pricesBtn;
+            } else {
+                pBtn.innerText = t.pricesBtnHide;
+            }
+
+            document.getElementById('referralLabel').innerText = t.referralLabel;
+            document.getElementById('referralBtn').innerText = t.referralBtn;
+            document.getElementById('adminLabel').innerText = t.adminLabel;
+            document.getElementById('adminBtn').innerText = t.adminBtn;
+            document.getElementById('warningText').innerText = t.warningText;
+        }
 
         // Анимация фона
         const canvas = document.getElementById('cmatrix');
@@ -436,76 +558,4 @@
 
         class Particle {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 3.5;
-                this.speedX = Math.random() * 0.8 - 0.4;
-                this.speedY = Math.random() * 0.8 - 0.4;
-                this.color = Math.random() > 0.6 ? '#00ffff' : (Math.random() > 0.5 ? '#ff0055' : '#00ff66');
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-
-                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
-                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 180; i++) {
-            particlesArray.push(new Particle());
-        }
-
-        function animate() {
-            ctx.fillStyle = '#010103';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // Появление/скрытие тарифов
-        function togglePrices() {
-            const priceList = document.getElementById('priceList');
-            const btn = document.getElementById('pricesBtn');
-            
-            if (priceList.style.display === 'flex') {
-                priceList.style.display = 'none';
-                btn.innerText = 'Посмотреть тарифы';
-            } else {
-                priceList.style.display = 'flex';
-                btn.innerText = 'Скрыть';
-            }
-        }
-
-        // Открытие ссылки триала
-        function openTrial() {
-            tg.openTelegramLink('https://t.me/obhod_mobilniy_bot?start=ref_7650109118');
-        }
-
-        // Показ заглушки реферальной ссылки
-        function showReferralAlert() {
-            alert('🛠 Раздел в разработке!\nСкоро здесь появится ваша реферальная ссылка.');
-        }
-
-        // Проверка пароля администратора
-        function checkAdminPassword() {
-            const pass = document.getElementById('adminPassword').value;
-            if (pass === 'fastcon123') {
-                alert('⚡ Этот раздел еще не доделан!');
-            } else {
-                alert('Неверный пароль.Гуляй.');
-            }
-        }
-    </script>
-</body>
-</html>
+                this.x 
