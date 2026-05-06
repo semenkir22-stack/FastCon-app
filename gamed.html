@@ -74,7 +74,7 @@ p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
 <div class="card">
   <h2 id="roundTitle">Раунд 1</h2>
   <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-  <div class="timer-text" id="timerText">10 сек</div>
+  <div class="timer-text" id="timerText">5 сек</div>
   <div class="log" id="log">⏳ Подключение к РКН...</div>
   <div id="svcList" style="margin:12px 0"></div>
   <div class="vpn-panel" id="vpnPanel" style="display:none">
@@ -95,7 +95,14 @@ p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
   <h2>Победа!</h2>
   <p class="big" style="color:var(--g)">Все блокировки успешно обойдены!</p>
   <p style="font-size:.82rem">Спасибо за использование FastCon VPN.</p>
-  <button class="btn" onclick="resetGame()">🔄 Играть снова</button>
+  
+  <div class="vpn-panel" style="margin-top:15px; margin-bottom:15px;">
+    <h3 style="color:var(--y)">🎁 Ваш подарок</h3>
+    <p style="font-size:.78rem; color:#b0b6c0">Бесплатный пробный период VPN уже ждет вас</p>
+    <a class="btn" style="max-width: 100%; margin-top: 8px; color:#000; text-decoration:none;" href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" target="_blank">🎁 Получить</a>
+  </div>
+
+  <button class="btn" style="margin-top: 8px; width:100%; max-width: none;" onclick="resetGame()">Пройти ещё раз</button>
 </div>
 </div>
 
@@ -113,7 +120,7 @@ p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
 
 <script>
   let currentLevel = 1;
-  let timerMax = 10;
+  let timerMax = 5; // Установлено время 5 секунд
   let timeLeft = timerMax;
   let timerInterval;
   let isLocked = false;
@@ -135,9 +142,8 @@ p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
 
   function startGameLoop() {
     isLocked = true;
-    timeLeft = Math.max(4, timerMax - Math.floor(currentLevel / 3));
+    timeLeft = Math.max(2, timerMax - Math.floor(currentLevel / 5));
     
-    // Выбираем случайный сервис
     currentSvc = services[Math.floor(Math.random() * services.length)];
     
     document.getElementById('roundTitle').innerText = `Раунд ${currentLevel} из 10`;
@@ -246,7 +252,6 @@ p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
 
   startGameLoop();
 
-  // Красивый фоновый эффект
   const canvas = document.getElementById('bg');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
