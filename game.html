@@ -1,359 +1,269 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastCon VPN — Игра</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>VPN Breaker Terminal // FastCon</title>
     <style>
-        :root {
-            --bg-color: #080710;
-            --neon-blue: #00e5ff;
-            --neon-purple: #9d4edd;
-            --pink-red: #ff2a6d;
-            --neon-glow: 0 0 20px rgba(0, 229, 255, 0.4);
-            --neon-border: 2px solid rgba(0, 229, 255, 0.6);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- Global Styling --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
         body {
-            background-color: var(--bg-color);
-            color: #ffffff;
-            font-family: 'Outfit', sans-serif;
+            background-color: #020c1e; /* Deep dark blue/black */
+            color: #00ffcc; /* Neon Cyan */
+            font-family: 'Share Tech Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            margin: 0;
+            padding: 20px;
             overflow: hidden;
-            position: relative;
         }
 
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .game-container {
-            position: relative;
-            z-index: 2;
+        #game-container {
+            background-color: rgba(10, 20, 40, 0.8); /* Semi-transparent dark panel */
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 20px #00ffcc, inset 0 0 10px #00ffcc;
+            padding: 40px;
             width: 90%;
-            max-width: 650px;
-            background: rgba(16, 14, 35, 0.7);
-            backdrop-filter: blur(15px);
-            border: var(--neon-border);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: var(--neon-glow);
-            text-align: center;
+            max-width: 800px;
+            box-sizing: border-box;
+            animation: glow 1.5s infinite alternate; /* Subtle glow animation */
         }
 
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- Text & Simulation Area --- */
+        #console-output {
+            min-height: 200px;
+            padding: 20px;
+            background-color: #020c1e;
+            border: 1px solid #008080;
             margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Maintains formatting */
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0; /* Starts hidden for animation */
+            animation: fadeIn 2s forwards;
         }
 
-        .score-board {
-            color: var(--neon-blue);
-        }
-
-        #gameCanvas {
-            background: rgba(8, 7, 16, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
-            display: block;
-            margin: 0 auto;
-        }
-
-        .btn-group {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .neon-btn {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            color: #ffffff;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            border: none;
+        /* --- Neon Button Styling --- */
+        button {
+            background: none;
+            border: 2px solid;
+            padding: 10px 20px;
+            margin: 5px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-            transition: all 0.3s ease;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s;
             text-transform: uppercase;
+            box-shadow: 0 0 5px #00ffcc;
+            color: #00ffcc;
+            outline: none;
         }
 
-        .neon-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+        button:hover:not(:disabled) {
+            background-color: rgba(0, 255, 204, 0.1);
+            box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+            transform: translateY(-3px);
         }
 
-        .secondary-btn {
-            background: #111;
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
             box-shadow: none;
         }
 
-        .secondary-btn:hover {
-            background: var(--neon-blue);
-            color: #080710;
+        /* --- Animation Keyframes --- */
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.8); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* --- Special Class for Alerts/Results --- */
+        .block {
+            color: #ff4757; /* Red neon */
+            text-shadow: 0 0 5px #ff4757;
+        }
+
+        .success {
+            color: #00ffcc; /* Cyan neon */
+            text-shadow: 0 0 5px #00ffcc;
+        }
+
+        .alert {
+            color: #ffcc00; /* Yellow neon */
+            text-shadow: 0 0 5px #ffcc00;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* --- Final CTA Button --- */
+        #cta-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            background-color: #ff00ff; /* Magenta contrast */
+            border-color: #ff00ff;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+        #cta-button:hover {
+             background-color: #ff00ff;
+             box-shadow: 0 0 30px #ff00ff;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
 
-    <div class="game-container">
-        <div class="game-header">
-            <div>FastCon VPN против РКН</div>
-            <div class="score-board">Счёт: <span id="score">0</span></div>
+    <div id="game-container">
+        <h1>:: VIRTUAL CONNECTION TERMINAL ::</h1>
+        <p>🔐 Статус: Ограниченный доступ. Симуляция обхода сетевой блокировки.</p>
+
+        <!-- Область вывода текста -->
+        <div id="console-output">
+            // Инициализация протокола. Ожидание ввода...
         </div>
 
-        <canvas id="gameCanvas" width="550" height="350"></canvas>
-
-        <div class="btn-group">
-            <button class="neon-btn" onclick="startOrPauseGame()" id="controlBtn">Старт</button>
-            <a href="menu.html" class="neon-btn secondary-btn">В меню</a>
+        <!-- Кнопки действий -->
+        <div id="controls">
+            <button id="start-btn" onclick="startSimulation()">ПОПРОБОВАТЬ ПОДКЛЮЧЕНИЕ</button>
         </div>
+
+        <!-- Блок с финальным призывом к действию (скрыт по умолчанию) -->
+        <a id="cta-button" href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" target="_blank" style="display: none;">
+            🟢 ПОБЕДА! АКТИВИРОВАТЬ ПРОБНЫЙ ПЕРИОД
+        </a>
     </div>
 
     <script>
-        // Анимация фона
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+        const consoleOutput = document.getElementById('console-output');
+        const controlsDiv = document.getElementById('controls');
+        const startBtn = document.getElementById('start-btn');
+        const ctaButton = document.getElementById('cta-button');
 
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
+        let gamePhase = 0;
 
-        let particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.radius = Math.random() * 2;
-                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff2a6d';
-                this.alpha = Math.random() * 0.3 + 0.1;
+        // Функция имитации ввода текста
+        function appendText(text, className = '') {
+            const p = document.createElement('p');
+            p.innerHTML = text;
+            if (className) {
+                p.className = className;
             }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                if (this.x < 0 || this.x > width) this.vx = -this.vx;
-                if (this.y < 0 || this.y > height) this.vy = -this.vy;
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = this.color;
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-        for (let i = 0; i < 70; i++) particles.push(new Particle());
-
-        function animateBg() {
-            ctx.fillStyle = '#080710';
-            ctx.fillRect(0, 0, width, height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateBg);
-        }
-        animateBg();
-
-        // Игровая логика
-        const gameCanvas = document.getElementById('gameCanvas');
-        const gCtx = gameCanvas.getContext('2d');
-        const scoreSpan = document.getElementById('score');
-        const controlBtn = document.getElementById('controlBtn');
-
-        let score = 0;
-        let isPlaying = false;
-        let animationId;
-
-        // Настройки игрока
-        const player = {
-            x: 20,
-            y: gameCanvas.height / 2,
-            width: 16,
-            height: 16,
-            speed: 5,
-            dy: 0,
-            color: '#00e5ff'
-        };
-
-        // Логика управления движением игрока
-        let keys = {};
-        window.addEventListener('keydown', function(e) {
-            keys[e.key] = true;
-        });
-        window.addEventListener('keyup', function(e) {
-            delete keys[e.key];
-        });
-
-        // Препятствия и цели
-        let packets = [];
-        let blocks = [];
-        let packetTimer = 0;
-        let blockTimer = 0;
-
-        function addPacket() {
-            packets.push({
-                x: gameCanvas.width,
-                y: Math.random() * (gameCanvas.height - 20) + 10,
-                width: 10,
-                height: 10,
-                color: '#9d4edd'
-            });
+            consoleOutput.appendChild(p);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
         }
 
-        function addBlock() {
-            blocks.push({
-                x: gameCanvas.width,
-                y: Math.random() * (gameCanvas.height - 40) + 10,
-                width: 15,
-                height: 35,
-                color: '#ff2a6d',
-                speed: Math.random() * 2 + 2
-            });
+        // Управление кнопками
+        function setControls(buttonsHTML) {
+            controlsDiv.innerHTML = buttonsHTML;
         }
 
-        function updateGame() {
-            if (!isPlaying) return;
+        // -------------------------------------------------------
+        // --- Логика Игры ---
+        // -------------------------------------------------------
 
-            gCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+        // Начало симуляции
+        function startSimulation() {
+            if (gamePhase > 0) return;
 
-            // Обработка движений
-            if ('ArrowUp' in keys || 'w' in keys) player.y -= player.speed;
-            if ('ArrowDown' in keys || 's' in keys) player.y += player.speed;
+            // Очистка и сброс
+            consoleOutput.innerHTML = '';
+            gamePhase = 1;
 
-            // Ограничение движения внутри Canvas
-            if (player.y < 0) player.y = 0;
-            if (player.y + player.height > gameCanvas.height) player.y = gameCanvas.height - player.height;
+            appendText(">> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ. ПОДКЛЮЧЕНИЕ К СЕТИ...", '');
+            setTimeout(() => {
+                appendText("\n[!] ПРЕДУПРЕЖДЕНИЕ: Обнаружен повышенный уровень сетевой фильтрации (РКН).", 'alert');
+                setTimeout(() => {
+                    appendText(">>> Целевые сервисы, подлежащие блокировке: YouTube, Instagram, VPN-протоколы и т.д.", 'block');
+                    setControls(
+                        `<button onclick="attemptConnection('youtube')">Попытаться зайти на YouTube</button>
+                         <button onclick="attemptConnection('insta')">Попытаться зайти в Instagram</button>
+                         <button onclick="attemptConnection('vpn')">Попробовать стандартный VPN</button>`
+                    );
+                }, 1500);
+            }, 1000);
+        }
 
-            // Отрисовка игрока
-            gCtx.fillStyle = player.color;
-            gCtx.shadowBlur = 8;
-            gCtx.shadowColor = player.color;
-            gCtx.fillRect(player.x, player.y, player.width, player.height);
+        // Попытка подключения (Основной игровой цикл)
+        function attemptConnection(service) {
+            if (gamePhase !== 1) return;
 
-            // Добавление новых элементов
-            packetTimer++;
-            if (packetTimer % 120 === 0) addPacket();
-            blockTimer++;
-            if (blockTimer % 80 === 0) addBlock();
+            const message = `Вы пытаетесь подключиться к сервису: ${service.toUpperCase()}...`;
+            appendText(message, '');
 
-            // Обработка пакетов (целей)
-            for (let i = packets.length - 1; i >= 0; i--) {
-                let p = packets[i];
-                p.x -= 2;
+            // Имитация задержки и ошибки
+            setTimeout(() => {
+                if (service === 'youtube' || service === 'insta' || service === 'vpn') {
+                    appendText(`\n[ERROR 403] Блокировка успешно применена. Контент недоступен. Сервис перехвачен на уровне DPI.`, 'block');
+                    
+                    setTimeout(() => {
+                        // Успех, ввод FastCon
+                        appendText("\n[!!!] ОШИБКА СЕТИ ПРЕВЫШЕНА. Обнаружен протокол FastCon. Активировано обходное ядро...", 'success');
+                        setControls(`
+                            <button onclick="bypass('fastcon')">ПРИМЕНИТЬ ОБХОД FASTCON</button>
+                        `);
+                    }, 2000);
 
-                gCtx.fillStyle = p.color;
-                gCtx.shadowColor = p.color;
-                gCtx.fillRect(p.x, p.y, p.width, p.height);
-
-                // Проверка столкновения
-                if (
-                    player.x < p.x + p.width &&
-                    player.x + player.width > p.x &&
-                    player.y < p.y + p.height &&
-                    player.y + player.height > p.y
-                ) {
-                    score += 10;
-                    scoreSpan.textContent = score;
-                    packets.splice(i, 1);
-                    continue;
+                } else {
+                    appendText(`\n[INFO] Сервис ${service.toUpperCase()} доступен. (Симуляция провала)`);
                 }
-
-                // Удаление за пределами экрана
-                if (p.x + p.width < 0) {
-                    packets.splice(i, 1);
-                }
-            }
-
-            // Обработка блоков (препятствий)
-            for (let i = blocks.length - 1; i >= 0; i--) {
-                let b = blocks[i];
-                b.x -= b.speed;
-
-                gCtx.fillStyle = b.color;
-                gCtx.shadowColor = b.color;
-                gCtx.fillRect(b.x, b.y, b.width, b.height);
-
-                // Проверка столкновения
-                if (
-                    player.x < b.x + b.width &&
-                    player.x + player.width > b.x &&
-                    player.y < b.y + b.height &&
-                    player.y + player.height > b.y
-                ) {
-                    gameOver();
-                }
-
-                // Удаление за пределами экрана
-                if (b.x + b.width < 0) {
-                    blocks.splice(i, 1);
-                }
-            }
-
-            animationId = requestAnimationFrame(updateGame);
+            }, 1500);
         }
 
-        function gameOver() {
-            isPlaying = false;
-            controlBtn.textContent = 'Старт';
-            alert('Игра окончена! Ваш счёт: ' + score);
-            resetGame();
+        // Функция обхода (Победа)
+        function bypass(vpnName) {
+            if (gamePhase !== 2) return;
+
+            appendText(`\n[CORE_EXEC] Инициирование обхода через протокол ${vpnName}.... Проверка каналов... ОК.`, 'success');
+            
+            setTimeout(() => {
+                appendText(`\n[SUCCESS] !!! СОЕДИНЕНИЕ УСТАНОВЛЕНО. БЛОКИРОВКА ПРЕОДОЛЕНА. ВСЕ СЕРВИСЫ ДОСТУПНЫ.`, 'success');
+                
+                // Финальная фаза
+                gamePhase = 3;
+                setControls(`
+                    <button onclick="showVictory()">ПОДТВЕРДИТЬ ПОБЕДУ</button>
+                `);
+            }, 2500);
+        }
+        
+        // Показ победного экрана и CTA
+        function showVictory() {
+             if (gamePhase !== 3) return;
+
+            consoleOutput.innerHTML += `\n\n=================================================\n`;
+            consoleOutput.innerHTML += `\n[=== WIN STATE ===]\n`;
+            consoleOutput.innerHTML += `\n[+] поздравляю с победой! Вы восстановили полный интернет доступ!`;
+            consoleOutput.innerHTML += `\n[!] Наслаждайтесь этим!`;
+            consoleOutput.innerHTML += `\n[!] Не платите за доступ к стабильности.`;
+            consoleOutput.innerHTML += `\n[!!!] Забирайте свой пробный период, чтобы навсегда забыть о блокировках!`;
+            consoleOutput.innerHTML += `\n=================================================\n`;
+            
+            setControls(""); // Удаляем кнопку "Подтвердить"
+            ctaButton.style.display = 'block'; // Показываем финальную кнопку
         }
 
-        function resetGame() {
-            score = 0;
-            scoreSpan.textContent = score;
-            player.y = gameCanvas.height / 2;
-            packets = [];
-            blocks = [];
-        }
-
-        function startOrPauseGame() {
-            if (isPlaying) {
-                isPlaying = false;
-                cancelAnimationFrame(animationId);
-                controlBtn.textContent = 'Старт';
-            } else {
-                isPlaying = true;
-                controlBtn.textContent = 'Пауза';
-                updateGame();
-            }
+        // Инициализация при загрузке
+        window.onload = function() {
+            // Убираем первую начальную заглушку
+            consoleOutput.innerHTML = `// Инициализация протокола. Ожидание ввода...`;
         }
     </script>
+
 </body>
 </html>
