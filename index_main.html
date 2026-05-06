@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastCon VPN — Игра</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080710;
+            --neon-blue: #00e5ff;
+            --neon-purple: #9d4edd;
+            --neon-glow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.1);
+            --neon-border: 2px solid rgba(0, 229, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Анимированный фон с частицами */
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Основной контейнер */
+        .container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 85%;
+            max-width: 1000px;
+            background: rgba(16, 14, 35, 0.7);
+            backdrop-filter: blur(15px);
+            border: var(--neon-border);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: var(--neon-glow);
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        /* Левая часть: кнопка игры */
+        .left-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-right: 40px;
+        }
+
+        .left-side h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .left-side p.subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 35px rgba(157, 78, 221, 0.6);
+        }
+
+        .play-btn:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        /* Правая часть: пояснение */
+        .right-side {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .right-side:hover {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+        }
+
+        .right-side h2 {
+            font-size: 1.8rem;
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+
+        .right-side p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 30px;
+                width: 90%;
+            }
+
+            .left-side {
+                padding-right: 0;
+                margin-bottom: 40px;
+            }
+
+            .left-side h1 {
+                font-size: 2.2rem;
+            }
+
+            .play-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="container">
+        <div class="left-side">
+            <h1>FastCon VPN</h1>
+            <p class="subtitle">Сражайтесь за свободу доступа и обходите ограничения в новой неоновой аркаде!</p>
+            <a href="game.html" class="play-btn">Играть</a>
+        </div>
+
+        <div class="right-side">
+            <h2>О проекте FastCon</h2>
+            <p>FastCon VPN — это надежный сервис, который позволяет обходить сетевые ограничения и обеспечивает безопасный доступ к заблокированным ресурсам. Наша технология помогает вам оставаться на связи без задержек и цензуры, объединяя скорость и высокую приватность.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Устанавливаем размеры
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Создаем массив частиц
+        let particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = Math.random() * 2.5;
+                this.color = Math.random() > 0.5 ? '#00e5ff' : '#9d4edd';
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Инициализация
+        for (let i = 0; i < 100; i++) {
+            particles.push(new Particle());
+        }
+
+        // Анимация
+        function animate() {
+            ctx.fillStyle = '#080710';
+            ctx.fillRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
