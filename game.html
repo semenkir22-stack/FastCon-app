@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastCon VPN — Игра</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080710;
+            --neon-blue: #00e5ff;
+            --neon-purple: #9d4edd;
+            --pink-red: #ff2a6d;
+            --neon-glow: 0 0 20px rgba(0, 229, 255, 0.4);
+            --neon-border: 2px solid rgba(0, 229, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .game-container {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 650px;
+            background: rgba(16, 14, 35, 0.7);
+            backdrop-filter: blur(15px);
+            border: var(--neon-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--neon-glow);
+            text-align: center;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .score-board {
+            color: var(--neon-blue);
+        }
+
+        #gameCanvas {
+            background: rgba(8, 7, 16, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .neon-btn {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .neon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.5);
+        }
+
+        .secondary-btn {
+            background: #111;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            box-shadow: none;
+        }
+
+        .secondary-btn:hover {
+            background: var(--neon-blue);
+            color: #080710;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div>FastCon VPN против РКН</div>
+            <div class="score-board">Счёт: <span id="score">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="550" height="350"></canvas>
+
+        <div class="btn-group">
+            <button class="neon-btn" onclick="startOrPauseGame()" id="controlBtn">Старт</button>
+            <a href="menu.html" class="neon-btn secondary-btn">В меню</a>
+        </div>
+    </div>
+
+    <script>
+        // Анимация фона
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        let particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2;
+                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff2a6d';
+                this.alpha = Math.random() * 0.3 + 0.1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        for (let i = 0; i < 70; i++) particles.push(new Particle());
+
+        function animateBg() {
+            ctx.fillStyle = '#080710';
+            ctx.fillRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // Игровая логика
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gCtx = gameCanvas.getContext('2d');
+        const scoreSpan = document.getElementById('score');
+        const controlBtn = document.getElementById('controlBtn');
+
+        let score = 0;
+        let isPlaying = false;
+        let animationId;
+
+        // Настройки игрока
+        const player = {
+            x: 20,
+            y: gameCanvas.height / 2,
+            width: 16,
+            height: 16,
+            speed: 5,
+            dy: 0,
+            color: '#00e5ff'
+        };
+
+        // Логика управления движением игрока
+        let keys = {};
+        window.addEventListener('keydown', function(e) {
+            keys[e.key] = true;
+        });
+        window.addEventListener('keyup', function(e) {
+            delete keys[e.key];
+        });
+
+        // Препятствия и цели
+        let packets = [];
+        let blocks = [];
+        let packetTimer = 0;
+        let blockTimer = 0;
+
+        function addPacket() {
+            packets.push({
+                x: gameCanvas.width,
+                y: Math.random() * (gameCanvas.height - 20) + 10,
+                width: 10,
+                height: 10,
+                color: '#9d4edd'
+            });
+        }
+
+        function addBlock() {
+            blocks.push({
+                x: gameCanvas.width,
+                y: Math.random() * (gameCanvas.height - 40) + 10,
+                width: 15,
+                height: 35,
+                color: '#ff2a6d',
+                speed: Math.random() * 2 + 2
+            });
+        }
+
+        function updateGame() {
+            if (!isPlaying) return;
+
+            gCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+            // Обработка движений
+            if ('ArrowUp' in keys || 'w' in keys) player.y -= player.speed;
+            if ('ArrowDown' in keys || 's' in keys) player.y += player.speed;
+
+            // Ограничение движения внутри Canvas
+            if (player.y < 0) player.y = 0;
+            if (player.y + player.height > gameCanvas.height) player.y = gameCanvas.height - player.height;
+
+            // Отрисовка игрока
+            gCtx.fillStyle = player.color;
+            gCtx.shadowBlur = 8;
+            gCtx.shadowColor = player.color;
+            gCtx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Добавление новых элементов
+            packetTimer++;
+            if (packetTimer % 120 === 0) addPacket();
+            blockTimer++;
+            if (blockTimer % 80 === 0) addBlock();
+
+            // Обработка пакетов (целей)
+            for (let i = packets.length - 1; i >= 0; i--) {
+                let p = packets[i];
+                p.x -= 2;
+
+                gCtx.fillStyle = p.color;
+                gCtx.shadowColor = p.color;
+                gCtx.fillRect(p.x, p.y, p.width, p.height);
+
+                // Проверка столкновения
+                if (
+                    player.x < p.x + p.width &&
+                    player.x + player.width > p.x &&
+                    player.y < p.y + p.height &&
+                    player.y + player.height > p.y
+                ) {
+                    score += 10;
+                    scoreSpan.textContent = score;
+                    packets.splice(i, 1);
+                    continue;
+                }
+
+                // Удаление за пределами экрана
+                if (p.x + p.width < 0) {
+                    packets.splice(i, 1);
+                }
+            }
+
+            // Обработка блоков (препятствий)
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                let b = blocks[i];
+                b.x -= b.speed;
+
+                gCtx.fillStyle = b.color;
+                gCtx.shadowColor = b.color;
+                gCtx.fillRect(b.x, b.y, b.width, b.height);
+
+                // Проверка столкновения
+                if (
+                    player.x < b.x + b.width &&
+                    player.x + player.width > b.x &&
+                    player.y < b.y + b.height &&
+                    player.y + player.height > b.y
+                ) {
+                    gameOver();
+                }
+
+                // Удаление за пределами экрана
+                if (b.x + b.width < 0) {
+                    blocks.splice(i, 1);
+                }
+            }
+
+            animationId = requestAnimationFrame(updateGame);
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            controlBtn.textContent = 'Старт';
+            alert('Игра окончена! Ваш счёт: ' + score);
+            resetGame();
+        }
+
+        function resetGame() {
+            score = 0;
+            scoreSpan.textContent = score;
+            player.y = gameCanvas.height / 2;
+            packets = [];
+            blocks = [];
+        }
+
+        function startOrPauseGame() {
+            if (isPlaying) {
+                isPlaying = false;
+                cancelAnimationFrame(animationId);
+                controlBtn.textContent = 'Старт';
+            } else {
+                isPlaying = true;
+                controlBtn.textContent = 'Пауза';
+                updateGame();
+            }
+        }
+    </script>
+</body>
+</html>
