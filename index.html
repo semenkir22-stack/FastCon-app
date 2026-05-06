@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastCon VPN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080710;
+            --neon-blue: #00e5ff;
+            --neon-purple: #9d4edd;
+            --neon-glow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.1);
+            --neon-border: 2px solid rgba(0, 229, 255, 0.6);
+            --pink-red: #ff2a6d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Шапка */
+        .header {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--pink-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lang-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Основной блок с тарифом */
+        .card-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(16, 14, 35, 0.7);
+            backdrop-filter: blur(15px);
+            border: var(--neon-border);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: var(--neon-glow);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 42, 109, 0.2);
+            color: var(--pink-red);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 35px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff2a6d, #9d4edd);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(255, 42, 109, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 35px rgba(255, 42, 109, 0.5);
+        }
+
+        /* Информационный блок */
+        .info-card {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .info-card h4 {
+            color: var(--neon-blue);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            color: var(--neon-blue);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Кнопка перехода к играм */
+        .game-link-btn {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .game-link-btn:hover {
+            background: var(--neon-blue);
+            color: #080710;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="header">
+        <div class="logo-text">FastCon</div>
+        <div class="lang-badge">
+            <span>RU 🇷🇺</span>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="badge">
+            ⚡ Бесплатный пробный период ⚡
+        </div>
+        <h2 class="title">3 ДНЯ БЕСПЛАТНО</h2>
+        <p class="desc">
+            Активируйте доступ к высокоскоростной инфраструктуре. Абсолютно неограниченный трафик без потери скорости соединения.
+        </p>
+        <button class="action-btn" onclick="window.location.href='https://t.me/obhod_mobilniy_bot'">Активировать</button>
+    </div>
+
+    <div class="info-card">
+        <h4>Пользователей онлайн</h4>
+        <p>Более 100 тысяч человек сейчас используют FastCon VPN</p>
+    </div>
+
+    <a href="menu.html" class="game-link-btn">
+        <span>🎮 Перейти к играм</span>
+    </a>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        let particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = Math.random() * 2.5;
+                this.color = Math.random() > 0.5 ? '#00e5ff' : '#ff2a6d';
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.fillStyle = '#080710';
+            ctx.fillRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
