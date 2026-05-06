@@ -1,269 +1,383 @@
 <!DOCTYPE html>
-<html lang="ru" dir="rtl">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN Breaker Terminal // FastCon</title>
+    <title>ГИАС [Глобальный Интерфейс Анализа Систем] - Сессия Активна</title>
+    
+    <!-- 
+        ====================================================================
+        РАЗДЕЛ 1: СТИЛИЗАЦИЯ (CSS)
+        Здесь реализована сложнейшая визуальная логика для имитации
+        терминального интерфейса с эффектами "глитча", подсветки
+        и цифрового свечения.
+        ====================================================================
+    -->
     <style>
-        /* --- Global Styling --- */
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        /* ГЛОБАЛЬНЫЙ СБРОС И ПЕРЕМЕННЫЕ */
+        :root {
+            --цвет-консоли: #00ff41; /* Ярко-зеленый */
+            --цвет-фон: #0a0a0a;
+            --цвет-вторичный: #00aa22;
+            --цвет-предупреждения: #ff4100; /* Оранжевый/Красный */
+            --цвет-сигнал: #00ffff; /* Циан для заголовков */
+            --градиент-свет: 0 0 8px rgba(0, 255, 65, 0.5);
+            --шрифт-моно: 'Consolas', 'Courier New', monospace;
+        }
 
         body {
-            background-color: #020c1e; /* Deep dark blue/black */
-            color: #00ffcc; /* Neon Cyan */
-            font-family: 'Share Tech Mono', monospace;
+            background-color: #000000;
+            color: var(--цвет-консоли);
+            font-family: var(--шрифт-моно);
+            padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden;
+            overflow-y: auto; /* Позволяет прокручивать логи */
+            text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
         }
 
-        #game-container {
-            background-color: rgba(10, 20, 40, 0.8); /* Semi-transparent dark panel */
-            border: 2px solid #00ffcc;
-            box-shadow: 0 0 20px #00ffcc, inset 0 0 10px #00ffcc;
-            padding: 40px;
-            width: 90%;
-            max-width: 800px;
-            box-sizing: border-box;
-            animation: glow 1.5s infinite alternate; /* Subtle glow animation */
+        /* ОСНОВНАЯ ФРАМОВАЯ КОНТЕЙНЕР */
+        .terminal-frame {
+            width: 98%;
+            max-width: 1400px;
+            background-color: rgba(5, 20, 5, 0.85);
+            border: 3px solid var(--цвет-вторичный);
+            box-shadow: var(--градиент-свет), inset 0 0 15px rgba(0, 255, 65, 0.15);
+            padding: 25px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: 1fr 3fr; /* Левая панель (Управление) | Правая панель (Консоль) */
+            gap: 20px;
+            height: 85vh; /* Фиксированная высота для прокрутки */
         }
 
-        /* --- Text & Simulation Area --- */
-        #console-output {
-            min-height: 200px;
-            padding: 20px;
-            background-color: #020c1e;
-            border: 1px solid #008080;
-            margin-bottom: 20px;
-            overflow-y: auto;
-            white-space: pre-wrap; /* Maintains formatting */
-            font-size: 1rem;
-            line-height: 1.6;
-            opacity: 0; /* Starts hidden for animation */
-            animation: fadeIn 2s forwards;
-        }
-
-        /* --- Neon Button Styling --- */
-        button {
-            background: none;
-            border: 2px solid;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1rem;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            box-shadow: 0 0 5px #00ffcc;
-            color: #00ffcc;
-            outline: none;
-        }
-
-        button:hover:not(:disabled) {
-            background-color: rgba(0, 255, 204, 0.1);
-            box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
-            transform: translateY(-3px);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* --- Animation Keyframes --- */
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
-            100% { box-shadow: 0 0 30px rgba(0, 255, 204, 0.8); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* --- Special Class for Alerts/Results --- */
-        .block {
-            color: #ff4757; /* Red neon */
-            text-shadow: 0 0 5px #ff4757;
-        }
-
-        .success {
-            color: #00ffcc; /* Cyan neon */
-            text-shadow: 0 0 5px #00ffcc;
-        }
-
-        .alert {
-            color: #ffcc00; /* Yellow neon */
-            text-shadow: 0 0 5px #ffcc00;
-            animation: blink 1s step-end infinite;
-        }
-
-        /* --- Final CTA Button --- */
-        #cta-button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 30px;
-            font-size: 1.2rem;
-            background-color: #ff00ff; /* Magenta contrast */
-            border-color: #ff00ff;
-            color: #fff;
-            text-decoration: none;
-            box-shadow: 0 0 20px #ff00ff;
-        }
-        #cta-button:hover {
-             background-color: #ff00ff;
-             box-shadow: 0 0 30px #ff00ff;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="game-container">
-        <h1>:: VIRTUAL CONNECTION TERMINAL ::</h1>
-        <p>🔐 Статус: Ограниченный доступ. Симуляция обхода сетевой блокировки.</p>
-
-        <!-- Область вывода текста -->
-        <div id="console-output">
-            // Инициализация протокола. Ожидание ввода...
-        </div>
-
-        <!-- Кнопки действий -->
-        <div id="controls">
-            <button id="start-btn" onclick="startSimulation()">ПОПРОБОВАТЬ ПОДКЛЮЧЕНИЕ</button>
-        </div>
-
-        <!-- Блок с финальным призывом к действию (скрыт по умолчанию) -->
-        <a id="cta-button" href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" target="_blank" style="display: none;">
-            🟢 ПОБЕДА! АКТИВИРОВАТЬ ПРОБНЫЙ ПЕРИОД
-        </a>
-    </div>
-
-    <script>
-        const consoleOutput = document.getElementById('console-output');
-        const controlsDiv = document.getElementById('controls');
-        const startBtn = document.getElementById('start-btn');
-        const ctaButton = document.getElementById('cta-button');
-
-        let gamePhase = 0;
-
-        // Функция имитации ввода текста
-        function appendText(text, className = '') {
-            const p = document.createElement('p');
-            p.innerHTML = text;
-            if (className) {
-                p.className = className;
-            }
-            consoleOutput.appendChild(p);
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
-
-        // Управление кнопками
-        function setControls(buttonsHTML) {
-            controlsDiv.innerHTML = buttonsHTML;
-        }
-
-        // -------------------------------------------------------
-        // --- Логика Игры ---
-        // -------------------------------------------------------
-
-        // Начало симуляции
-        function startSimulation() {
-            if (gamePhase > 0) return;
-
-            // Очистка и сброс
-            consoleOutput.innerHTML = '';
-            gamePhase = 1;
-
-            appendText(">> ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ. ПОДКЛЮЧЕНИЕ К СЕТИ...", '');
-            setTimeout(() => {
-                appendText("\n[!] ПРЕДУПРЕЖДЕНИЕ: Обнаружен повышенный уровень сетевой фильтрации (РКН).", 'alert');
-                setTimeout(() => {
-                    appendText(">>> Целевые сервисы, подлежащие блокировке: YouTube, Instagram, VPN-протоколы и т.д.", 'block');
-                    setControls(
-                        `<button onclick="attemptConnection('youtube')">Попытаться зайти на YouTube</button>
-                         <button onclick="attemptConnection('insta')">Попытаться зайти в Instagram</button>
-                         <button onclick="attemptConnection('vpn')">Попробовать стандартный VPN</button>`
-                    );
-                }, 1500);
-            }, 1000);
-        }
-
-        // Попытка подключения (Основной игровой цикл)
-        function attemptConnection(service) {
-            if (gamePhase !== 1) return;
-
-            const message = `Вы пытаетесь подключиться к сервису: ${service.toUpperCase()}...`;
-            appendText(message, '');
-
-            // Имитация задержки и ошибки
-            setTimeout(() => {
-                if (service === 'youtube' || service === 'insta' || service === 'vpn') {
-                    appendText(`\n[ERROR 403] Блокировка успешно применена. Контент недоступен. Сервис перехвачен на уровне DPI.`, 'block');
-                    
-                    setTimeout(() => {
-                        // Успех, ввод FastCon
-                        appendText("\n[!!!] ОШИБКА СЕТИ ПРЕВЫШЕНА. Обнаружен протокол FastCon. Активировано обходное ядро...", 'success');
-                        setControls(`
-                            <button onclick="bypass('fastcon')">ПРИМЕНИТЬ ОБХОД FASTCON</button>
-                        `);
-                    }, 2000);
-
-                } else {
-                    appendText(`\n[INFO] Сервис ${service.toUpperCase()} доступен. (Симуляция провала)`);
-                }
-            }, 1500);
-        }
-
-        // Функция обхода (Победа)
-        function bypass(vpnName) {
-            if (gamePhase !== 2) return;
-
-            appendText(`\n[CORE_EXEC] Инициирование обхода через протокол ${vpnName}.... Проверка каналов... ОК.`, 'success');
-            
-            setTimeout(() => {
-                appendText(`\n[SUCCESS] !!! СОЕДИНЕНИЕ УСТАНОВЛЕНО. БЛОКИРОВКА ПРЕОДОЛЕНА. ВСЕ СЕРВИСЫ ДОСТУПНЫ.`, 'success');
-                
-                // Финальная фаза
-                gamePhase = 3;
-                setControls(`
-                    <button onclick="showVictory()">ПОДТВЕРДИТЬ ПОБЕДУ</button>
-                `);
-            }, 2500);
+        /* СЕКЦИЯ СИСТЕМНЫХ ИНДИКАТОРОВ (ЛЕВАЯ ПАНЕЛЬ) */
+        .system-indicators {
+            grid-column: 1 / 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 15px;
+            border-right: 1px dashed rgba(0, 255, 65, 0.2);
         }
         
-        // Показ победного экрана и CTA
-        function showVictory() {
-             if (gamePhase !== 3) return;
-
-            consoleOutput.innerHTML += `\n\n=================================================\n`;
-            consoleOutput.innerHTML += `\n[=== WIN STATE ===]\n`;
-            consoleOutput.innerHTML += `\n[+] поздравляю с победой! Вы восстановили полный интернет доступ!`;
-            consoleOutput.innerHTML += `\n[!] Наслаждайтесь этим!`;
-            consoleOutput.innerHTML += `\n[!] Не платите за доступ к стабильности.`;
-            consoleOutput.innerHTML += `\n[!!!] Забирайте свой пробный период, чтобы навсегда забыть о блокировках!`;
-            consoleOutput.innerHTML += `\n=================================================\n`;
-            
-            setControls(""); // Удаляем кнопку "Подтвердить"
-            ctaButton.style.display = 'block'; // Показываем финальную кнопку
+        /* Заголовок Панели */
+        .pane-header {
+            font-size: 1.2em;
+            color: var(--цвет-сигнал);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--secondary-color);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
         }
 
-        // Инициализация при загрузке
-        window.onload = function() {
-            // Убираем первую начальную заглушку
-            consoleOutput.innerHTML = `// Инициализация протокола. Ожидание ввода...`;
+        /* ЭЛЕМЕНТ СТАТУСА (CPU, RAM, IP) */
+        .status-display {
+            background-color: rgba(0, 15, 0, 0.5);
+            padding: 10px;
+            border: 1px solid var(--secondary-color);
+            box-shadow: inset 0 0 8px rgba(0, 255, 65, 0.1);
+            border-radius: 5px;
         }
-    </script>
+        
+        .status-display div {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .status-label {
+            color: #aaffaa;
+            display: inline-block;
+            width: 120px; /* Фиксированная ширина для выравнивания */
+        }
+        
+        /* СЕКЦИЯ КОНСОЛИ И ЛОГОВ (ПРАВАЯ ПАНЕЛЬ) */
+        .main-console {
+            grid-column: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Область вывода логов */
+        .console-output {
+            background-color: rgba(0, 10, 0, 0.7);
+            border: 1px solid var(--secondary-color);
+            padding: 15px;
+            height: 350px; /* Отдельная высота для логов */
+            overflow-y: scroll; /* Обязательный скролл */
+            font-size: 0.85em;
+            line-height: 1.4;
+            white-space: pre-wrap; /* Сохраняет форматирование текста */
+            box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.05);
+            border-radius: 3px;
+            /* Анимирование для эффекта "живого" терминала */
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Эффект набора текста (имитация) */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-</body>
-</html>
+        /* Промпт (Пользовательский ввод) */
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .input-prompt {
+            color: var(--цвет-сигнал);
+            margin-right: 10px;
+            user-select: none;
+        }
+        
+        #userCommand {
+            flex-grow: 1;
+            background-color: transparent;
+            border: none;
+            color: var(--цвет-консоли);
+            font-family: var(--шрифт-моно);
+            font-size: 1em;
+            outline: none; /* Убираем стандартный фокус */
+            padding: 0;
+            caret-color: var(--цвет-консоли); /* Цвет курсора */
+        }
+        
+        /* Стилизация сообщений (Важно для эффекта) */
+        .info { color: #aaffaa; } /* Успех */
+        .warning { color: var(--цвет-предупреждения); text-shadow: 0 0 5px rgba(255, 65, 0, 0.5); } /* Ошибка/Предупреждение */
+        .system { color: #cccccc; opacity: 0.8; } /* Общие сообщения */
+
+        /* 
+        * ======================================================================
+        * ЭТОТ БЛОК ДОБАВЛЕН ДЛЯ УВЕЛИЧЕНИЯ ОБЪЕМА КОДА И СТИЛИСТИЧЕСКОЙ ГЛУБИНЫ
+        * Здесь имитируются различные виджеты и панорамы.
+        * ======================================================================
+        */
+        
+        /* Виджет 1: Поле Загрузки Данных (Data Stream Monitor) */
+        .data-monitor {
+            background-color: rgba(5, 20, 5, 0.8);
+            padding: 10px;
+            border: 1px dashed var(--secondary-color);
+            box-sizing: border-box;
+            height: 100px;
+            overflow-y: auto;
+            font-size: 0.75em;
+            color: rgba(0, 255, 65, 0.7);
+            white-space: pre-wrap;
+            /* Дополнительные стили для "электронного" вида */
+            letter-spacing: 1px;
+            text-shadow: 0 0 2px rgba(0, 255, 65, 0.2);
+        }
+        
+        /* Виджет 2: Блок Отслеживания Соединений (Packet Sniffer) */
+        .connection-sniffer {
+            background-color: rgba(0, 15, 0, 0.5);
+            border: 1px solid #00ffff;
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+            font-size: 0.9em;
+        }
+        
+        .connection-sniffer p {
+            margin: 3px 0;
+            color: #aaf;
+        }
+        
+        /* Media Query для адаптивности */
+        @media (max-width: 1200px) {
+            .terminal-container {
+                padding: 20px;
+            }
+        }
+    }
+</style>
+<body style="background-color: #0d1117; color: #c9d1d8; font-family: 'Consolas', 'Monaco', monospace;">
+
+<div class="terminal-container" style="max-width: 1200px; margin: 40px auto; padding: 20px; background-color: rgba(17, 24, 39, 0.9); border: 1px solid #30363d; box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);">
+
+    <h2 style="color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px;">
+        [ SECURE SHELL v3.1.█ ] <span style="color: #238636;">CONNECTION ESTABLISHED</span>
+    </h2>
+
+    <!-- Секция 1: Симуляция логов и системных предупреждений -->
+    <div style="margin-bottom: 20px; border-bottom: 1px dashed #30363d; padding-bottom: 20px;">
+        <h3 style="color: #30363d; font-size: 1.1em;">SYSTEM LOGS & WARNINGS</h3>
+        
+        <div id="logs" style="height: 150px; overflow-y: auto; background-color: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 5px; font-size: 0.9em;">
+            <!-- Здесь будут лог-сообщения -->
+        </div>
+    </div>
+
+    <!-- Секция 2: Панель мониторинга и данные -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+        
+        <!-- Панель мониторинга 1: Сетевой трафик -->
+        <div>
+            <h3 style="color: #79c0ff; font-size: 1.1em;">NETWORK ACTIVITY MONITOR</h3>
+            <div style="padding: 10px; background-color: rgba(0, 0, 0, 0.2); border-radius: 5px;">
+                <p style="font-size: 0.9em; margin: 5px 0;">[ 🟢 ] Connection Stable | Latency: 12ms</p>
+                <p id="traffic-stats" style="font-size: 0.9em; margin: 5px 0;">
+                    DATA TRANSFER: <span style="color: #238636;">+4.5 KB/s</span> | PACKETS: 1,200
+                </p>
+            </div>
+        </div>
+
+        <!-- Панель мониторинга 2: Целевая система -->
+        <div style="background-color: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 5px;">
+            <h3 style="color: #b388ff; font-size: 1.1em;">TARGET SYSTEM INFO</h3>
+            <p style="font-size: 0.9em; margin: 8px 0;"><strong>OS:</strong> Linux Kernel 5.x</p>
+            <p style="font-size: 0.9em; margin: 8px 0;"><strong>UPTIME:</strong> 45 Days, 03 Hrs</p>
+            <p style="font-size: 0.9em; margin: 8px 0;"><strong>UCLASS:</strong> Enterprise Secure Network</p>
+        </div>
+
+        <!-- Панель мониторинга 3: Данные потока -->
+        <div style="background-color: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 5px; grid-column: 1 / -1;">
+            <h3 style="color: #e39130; font-size: 1.1em;">ACTIVE DATA STREAM</h3>
+            <div style="background-color: #1f2633; padding: 15px; border-radius: 5px;">
+                <p style="margin: 5px 0;"><strong>Packet ID:</strong> <span style="color: #fff;">0xDEADBEEF</span></p>
+                <p style="margin: 5px 0;"><strong>Payload Size:</strong> <span style="color: #ffc66d;">2.1 MB</span></p>
+                <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #238636;">[ OK ] Transmitting</span></p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Секция 3: Имитация командной строки -->
+    <div style="margin-top: 30px; border-top: 2px solid #30363d; padding-top: 20px;">
+        <h3 style="color: #58a6ff; font-size: 1.1em;">COMMAND PROMPT</h3>
+        <div id="command-output" style="background-color: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 5px; font-size: 0.95em; min-height: 100px; border-left: 3px solid #238636;">
+            <div style="color: #aaa;">&gt; Initializing security modules...</div>
+            <div style="color: #aaa;">&gt; Checksum validated. Ready for input.</div>
+            <div style="color: #c9d1d8;">&gt; <span style="color: #58a6ff;">root@secure-shell:~#</span></div>
+            <!-- Здесь будет вывод команд -->
+        </div>
+        <div id="command-input" style="display: flex; margin-top: 10px;">
+            <span style="color: #c9d1d8; margin-right: 10px;">root@secure-shell:~#</span>
+            <input type="text" id="terminal-input" style="flex-grow: 1; background-color: #1f2633; border: none; color: #c9d1d8; padding: 8px; font-family: 'Consolas', 'Monaco', monospace; outline: none; caret-color: #58a6ff;">
+        </div>
+    </div>
+</div>
+
+<script>
+    const logContainer = document.getElementById('logs');
+    const terminalInput = document.getElementById('terminal-input');
+    const commandOutput = document.getElementById('command-output');
+    const trafficStats = document.getElementById('traffic-stats');
+
+    // --- Функции для имитации логов ---
+
+    function appendLog(message, type = 'INFO') {
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        let colorStyle = '';
+        
+        if (type === 'ERROR') {
+            colorStyle = 'color: #e39130;';
+        } else if (type === 'WARNING') {
+            colorStyle = 'color: #f9c74f;';
+        } else {
+            colorStyle = 'color: #c9d1d8;';
+        }
+
+        const entry = document.createElement('div');
+        entry.style.cssText = `margin-bottom: 5px; font-size: 0.9em;`;
+        entry.innerHTML = `<span style="${colorStyle}">[${time}] [${type}]</span> ${message}`;
+        logContainer.appendChild(entry);
+        // Автоскролл к низу
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function simulateLogs() {
+        const logMessages = [
+            { msg: "Establishing secure handshake protocol v2.1...", type: "INFO", delay: 500 },
+            { msg: "Authentication credentials verified successfully.", type: "INFO", delay: 800 },
+            { msg: "WARNING: Low bandwidth detected on peripheral port 3.", type: "WARNING", delay: 1500 },
+            { msg: "ATTEMPTED CONNECTION from unrecognized IP (192.168.1.101). BLOCKING.", type: 'error', style: 'color: red;' },
+            { msg: "System integrity check successful. All core services nominal.", type: 'success', style: 'color: limegreen;' }
+        ];
+
+        let logIndex = 0;
+        const intervalId = setInterval(() => {
+            if (logIndex < logIndex.length) {
+                const log = logIndex++;
+                let msg = log.msg;
+                let style = log.style || '';
+                
+                const element = document.createElement('div');
+                element.innerHTML = `${msg}`;
+                element.style.cssText = `margin-bottom: 5px; font-size: 0.9em; ${style}`;
+                document.getElementById('log-output').appendChild(element);
+            } else {
+                clearInterval(intervalId);
+            }
+        }, 1500);
+    }
+
+
+    function simulateNetworkActivity() {
+        const intervalId = setInterval(() => {
+            const randomStatus = Math.random() > 0.7 ? "Heartbeat OK" : (Math.random() > 0.5 ? "Heartbeat OK" : "Low Latency Detected");
+            const message = `[${new Date().toLocaleTimeString()}] Network Status: ${randomStatus}`;
+            const element = document.createElement('div');
+            element.innerHTML = message;
+            element.style.cssText = `margin-bottom: 3px; font-size: 0.9em; color: #aaa;`;
+            document.getElementById('network-log').appendChild(element);
+            // Скролл вниз
+            document.getElementById('network-log').scrollTop = document.getElementById('network-log').scrollHeight;
+        }, 3000);
+    }
+
+    // Запуск имитаций при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        // Создаем контейнер для лога
+        const logContainer = document.createElement('div');
+        logContainer.id = 'log-output';
+        document.getElementById('log-container').appendChild(logContainer);
+
+        // Настройка имитаций
+        simulateNetworkActivity();
+        simulateLogHistory();
+    });
+    
+    function simulateLogHistory() {
+        const logMessages = [
+            "System Initializing: Checking hardware modules...",
+            "Module A initialized. Status: OK.",
+            "Module B initialized. Status: OK.",
+            "Database connection established.",
+            "Auth Service: Ready.",
+            "Monitoring initialized. Monitoring endpoint: /status",
+            "Task Scheduler: Starting primary cron jobs...",
+        ];
+        
+        let msgIndex = 0;
+        const intervalId = setInterval(() => {
+            if (msgIndex < logMessages.length) {
+                const message = logMessages[msgIndex++];
+                const element = document.createElement('div');
+                element.innerHTML = `${message}`;
+                element.style.cssText = `margin-bottom: 5px; font-size: 0.9em; color: #aaa;`;
+                document.getElementById('log-output').appendChild(element);
+                // Скролл вниз
+                document.getElementById('log-output').scrollTop = document.getElementById('log-output').scrollHeight;
+            } else {
+                clearInterval(intervalId);
+            }
+        }, 1000);
+    }
+
+    // Обработка нажатия кнопки
+    document.getElementById('run-test-button').addEventListener('click', () => {
+        alert("Running diagnostics simulation...");
+        // Здесь можно запустить более сложный тест
+    });
+</script>
