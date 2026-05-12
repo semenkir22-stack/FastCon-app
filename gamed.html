@@ -1,290 +1,363 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>FastCon VPN — Игра</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-:root{--c:#00f3ff;--m:#ff00ff;--g:#39ff14;--y:#fff01f;--bg:#0a0b10}
-body{background:var(--bg);color:#e0e6ed;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;height:100dvh;width:100vw;position:relative}
-canvas#bg{position:fixed;inset:0;z-index:0;opacity:.4}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:10;opacity:0;pointer-events:none;transition:opacity .5s,transform .5s;transform:scale(.93)}
-.screen.on{opacity:1;pointer-events:all;transform:scale(1)}
-.card{background:rgba(15,16,22,.88);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-height:90dvh;overflow-y:auto}
-.card::-webkit-scrollbar{width:4px}
-.card::-webkit-scrollbar-thumb{background:var(--c);border-radius:4px}
-h1{font-size:1.8rem;text-align:center;background:linear-gradient(90deg,var(--c),var(--m),var(--g));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gs 4s ease infinite;text-shadow:0 0 8px rgba(0,243,255,.4);margin-bottom:12px}
-h2{font-size:1.4rem;text-align:center;color:var(--c);text-shadow:0 0 12px var(--c);margin-bottom:12px}
-p,li{font-size:.92rem;line-height:1.6;color:#8b92a1;margin-bottom:10px}
-.step-list{list-style:none;padding:0}
-.step-list li{padding:10px 12px;margin-bottom:8px;background:rgba(0,243,255,.04);border-left:3px solid var(--c);border-radius:0 8px 8px 0;font-size:.88rem}
-.btn{display:flex;align-items:center;justify-content:center;padding:14px 24px;margin-top:18px;font-size:1rem;font-weight:700;color:#000;background:linear-gradient(135deg,var(--c),var(--m));border:none;border-radius:12px;cursor:pointer;width:100%;max-width:300px;position:relative;overflow:hidden;transition:all .3s;box-shadow:0 0 15px var(--c);text-decoration:none;text-align:center}
-.btn::after{content:'';position:absolute;inset:-2px;background:linear-gradient(45deg,var(--c),var(--m),var(--g),var(--c));background-size:400%;z-index:-1;border-radius:14px;animation:borderGlow 3s linear infinite;opacity:.6}
-.btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 30px var(--m)}
-.btn:active{transform:scale(.97)}
-@keyframes gs{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-@keyframes borderGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-@keyframes scanline{0%{top:-100%}100%{top:100%}}
-@keyframes blockPulse{0%,100%{box-shadow:0 0 5px rgba(255,0,0,.3)}50%{box-shadow:0 0 20px rgba(255,0,0,.6)}}
-@keyframes vpnGlow{0%,100%{box-shadow:0 0 5px rgba(57,255,20,.4)}50%{box-shadow:0 0 25px rgba(57,255,20,.7)}}
-@keyframes countPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-.service-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:8px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06);transition:all .4s;font-size:.88rem}
-.service-row.blocked{border-color:rgba(255,0,0,.4);background:rgba(255,0,0,.05);animation:blockPulse 2s infinite}
-.service-row.vpn{border-color:rgba(57,255,20,.4);background:rgba(57,255,20,.05);animation:vpnGlow 2s infinite}
-.service-row.done{border-color:rgba(57,255,20,.2);background:rgba(57,255,20,.02)}
-.s-name{display:flex;align-items:center;gap:8px}
-.s-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
-.s-status{font-size:.72rem;padding:3px 8px;border-radius:20px;font-weight:600}
-.s-status.no{background:rgba(255,50,50,.15);color:#ff5555}
-.s-status.yes{background:rgba(57,255,20,.15);color:var(--g)}
-.s-status.v{background:rgba(57,255,20,.2);color:var(--g);animation:pulse 1.5s infinite}
-.progress-wrap{width:100%;margin:12px 0}
-.progress-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--c),var(--g));border-radius:3px;transition:width .6s ease;width:0%}
-.progress-text{text-align:center;font-size:.78rem;color:#555;margin-top:6px}
-.vpn-panel{padding:16px;background:rgba(57,255,20,.04);border:1px solid rgba(57,255,20,.15);border-radius:12px;margin:10px 0;text-align:center}
-.vpn-panel h3{color:var(--g);font-size:.95rem;margin-bottom:8px}
-.vpn-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;margin:8px 4px 0;font-size:.85rem;font-weight:700;color:#000;background:linear-gradient(135deg,var(--g),var(--c));border:none;border-radius:10px;cursor:pointer;box-shadow:0 0 12px rgba(57,255,20,.3);transition:all .3s}
-.vpn-btn:hover{box-shadow:0 0 25px rgba(57,255,20,.5);transform:scale(1.05)}
-.vpn-btn:active{transform:scale(.95)}
-.vpn-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.victory{text-align:center}
-.victory .trophy{font-size:4rem;margin-bottom:10px;animation:pulse 1.5s infinite}
-.victory .big{font-size:1.2rem;color:var(--g);font-weight:700;margin:10px 0}
-.shake{animation:shake .5s ease}
-.log{font-size:.75rem;color:var(--c);padding:8px 12px;background:rgba(0,243,255,.04);border-radius:8px;margin:8px 0;border:1px solid rgba(0,243,255,.1);min-height:36px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(15,16,22,.95);border:1px solid var(--c);border-radius:12px;padding:12px 20px;z-index:100;font-size:.85rem;color:var(--c);box-shadow:0 0 20px var(--c);transition:transform .4s ease;white-space:nowrap;max-width:90vw;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.fail{border-color:#ff5555;color:#ff5555;box-shadow:0 0 20px rgba(255,0,0,.3)}
-.timer-bar{width:100%;height:8px;background:rgba(255,255,255,.06);border-radius:4px;margin:10px 0;overflow:hidden;position:relative}
-.timer-fill{height:100%;border-radius:4px;transition:width .1s linear,background .3s}
-.timer-text{font-size:.78rem;color:#555;text-align:right}
-@media(max-height:700px){.card{max-height:95dvh;padding:16px}h1{font-size:1.5rem}p,li{font-size:.84rem;margin-bottom:6px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastCon: Cyber-Bypass 2026</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #00ff9f;
+            --bg-dark: #050505;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+            border: 2px solid var(--neon-blue);
+        }
+
+        canvas {
+            display: block;
+            background: #000;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(0,243,255,0.1), transparent);
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 4px solid var(--neon-blue);
+            padding: 10px 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .label { font-size: 10px; color: var(--neon-blue); margin-bottom: 5px; }
+        .value { font-size: 20px; font-weight: bold; text-shadow: 0 0 10px var(--neon-blue); }
+
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            border: 2px solid var(--neon-pink);
+            display: none;
+        }
+
+        h2 { color: var(--neon-pink); font-size: 40px; margin: 0; text-shadow: 0 0 20px var(--neon-pink); }
+        
+        .btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            cursor: pointer;
+            font-size: 18px;
+            font-family: inherit;
+            transition: 0.3s;
+            pointer-events: all;
+        }
+
+        .btn:hover {
+            background: var(--neon-green);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+
+        .glitch-text {
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+    <div id="game-container">
+        <div class="ui-layer">
+            <div class="stat-box">
+                <div class="label">Traffic Restored</div>
+                <div id="score" class="value">0.00 GB</div>
+            </div>
+            <div class="stat-box" style="border-color: var(--neon-pink);">
+                <div class="label">Signal Integrity</div>
+                <div id="health" class="value">100%</div>
+            </div>
+        </div>
 
-<div class="screen on" id="sGame">
-<div class="card">
-  <h2 id="roundTitle">Раунд 1</h2>
-  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-  <div class="timer-text" id="timerText">5 сек</div>
-  <div class="log" id="log">⏳ Подключение к РКН...</div>
-  <div id="svcList" style="margin:12px 0"></div>
-  <div class="vpn-panel" id="vpnPanel" style="display:none">
-    <h3>⚡ VPN FastCon готов</h3>
-    <p style="font-size:.78rem;color:#788">Нажмите для автоматической настройки защиты</p>
-    <button class="vpn-btn" id="btnActivate" onclick="activateVPN()">🛡 Включить</button>
-  </div>
-  <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-text" id="progressText">Обойдено блокировок: 0 / 10</div>
-  </div>
-</div>
-</div>
+        <canvas id="gameCanvas"></canvas>
 
-<div class="screen" id="sVictory">
-<div class="card victory">
-  <div class="trophy">🏆</div>
-  <h2>Победа!</h2>
-  <p class="big" style="color:var(--g)">Все блокировки успешно обойдены!</p>
-  <p style="font-size:.82rem">Спасибо за использование FastCon VPN.</p>
-  
-  <div class="vpn-panel" style="margin-top:15px; margin-bottom:15px;">
-    <h3 style="color:var(--y)">🎁 Ваш подарок</h3>
-    <p style="font-size:.78rem; color:#b0b6c0">Бесплатный пробный период VPN уже ждет вас</p>
-    <a class="btn" style="max-width: 100%; margin-top: 8px; color:#000; text-decoration:none;" href="https://t.me/obhod_mobilniy_bot?start=ref_7650109118" target="_blank">🎁 Получить</a>
-  </div>
-
-  <button class="btn" style="margin-top: 8px; width:100%; max-width: none;" onclick="resetGame()">Пройти ещё раз</button>
-</div>
-</div>
-
-<div class="screen" id="sFail">
-<div class="card victory">
-  <div class="trophy" style="color: #ff5555">⚠️</div>
-  <h2 style="color: #ff5555">Блокировка пропущена</h2>
-  <p class="big" style="color:#ff5555">Соединение с РКН разорвано</p>
-  <p style="font-size:.82rem">Вы не успели применить VPN.</p>
-  <button class="btn" style="background:linear-gradient(135deg, #ff5555, #a31)" onclick="resetGame()">Попробовать снова</button>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
+        <div id="overlay">
+            <h2 class="glitch-text">CONNECTION TERMINATED</h2>
+            <p id="final-stats" style="color: #888; margin: 20px 0;"></p>
+            <button class="btn" onclick="init()">RE-ESTABLISH VLESS</button>
+        </div>
+    </div>
 
 <script>
-  let currentLevel = 1;
-  let timerMax = 5; // Установлено время 5 секунд
-  let timeLeft = timerMax;
-  let timerInterval;
-  let isLocked = false;
-  let currentSvc = {};
-  let successCount = 0;
-  
-  const services = [
-    { name: "Telegram", icon: "💬", color: "#0088cc" },
-    { name: "YouTube", icon: "▶️", color: "#ff0000" },
-    { name: "Instagram", icon: "📸", color: "#E1306C" },
-    { name: "WhatsApp", icon: "🟢", color: "#25D366" },
-    { name: "Discord", icon: "🎮", color: "#5865F2" },
-    { name: "X (Twitter)", icon: "✖️", color: "#000000" },
-    { name: "TikTok", icon: "🎵", color: "#00f2fe" },
-    { name: "Pinterest", icon: "📌", color: "#E60023" },
-    { name: "LinkedIn", icon: "💼", color: "#0077b5" },
-    { name: "Reddit", icon: "👽", color: "#FF4500" }
-  ];
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const healthEl = document.getElementById('health');
+    const overlay = document.getElementById('overlay');
+    const finalStats = document.getElementById('finalStats');
 
-  function startGameLoop() {
-    isLocked = true;
-    timeLeft = Math.max(2, timerMax - Math.floor(currentLevel / 5));
-    
-    currentSvc = services[Math.floor(Math.random() * services.length)];
-    
-    document.getElementById('roundTitle').innerText = `Раунд ${currentLevel} из 10`;
-    document.getElementById('log').innerText = `🚫 РКН пытается заблокировать ${currentSvc.name}`;
-    
-    let html = `
-      <div class="service-row blocked">
-        <div class="s-name">
-          <div class="s-icon" style="background:${currentSvc.color}">${currentSvc.icon}</div>
-          <b>${currentSvc.name}</b>
-        </div>
-        <div class="s-status no">Блокировка</div>
-      </div>
-    `;
-    document.getElementById('svcList').innerHTML = html;
-    
-    document.getElementById('vpnPanel').style.display = 'block';
-    document.getElementById('btnActivate').disabled = false;
-    
-    let timerEl = document.getElementById('timerFill');
-    let timerText = document.getElementById('timerText');
-    
-    clearInterval(timerInterval);
-    
-    let start = Date.now();
-    timerInterval = setInterval(() => {
-      let passed = (Date.now() - start) / 1000;
-      let left = Math.max(0, timeLeft - passed);
-      let perc = (left / timeLeft) * 100;
-      
-      timerEl.style.width = `${perc}%`;
-      timerText.innerText = `${Math.ceil(left)} сек`;
-      
-      if (left <= 0) {
-        clearInterval(timerInterval);
-        triggerFail();
-      }
-    }, 100);
-  }
+    canvas.width = 500;
+    canvas.height = 700;
 
-  function activateVPN() {
-    clearInterval(timerInterval);
-    document.getElementById('btnActivate').disabled = true;
-    
-    let html = `
-      <div class="service-row vpn">
-        <div class="s-name">
-          <div class="s-icon" style="background:${currentSvc.color}">${currentSvc.icon}</div>
-          <b>${currentSvc.name}</b>
-        </div>
-        <div class="s-status v">Защита...</div>
-      </div>
-    `;
-    document.getElementById('svcList').innerHTML = html;
-    document.getElementById('log').innerText = `📶 FastCon VPN включен для ${currentSvc.name}`;
-    
-    setTimeout(() => {
-      successCount++;
-      document.getElementById('progressFill').style.width = `${(successCount / 10) * 100}%`;
-      document.getElementById('progressText').innerText = `Обойдено блокировок: ${successCount} / 10`;
-      
-      let htmlDone = `
-        <div class="service-row done">
-          <div class="s-name">
-            <div class="s-icon" style="background:${currentSvc.color}">${currentSvc.icon}</div>
-            <b>${currentSvc.name}</b>
-          </div>
-          <div class="s-status yes">Защищено</div>
-        </div>
-      `;
-      document.getElementById('svcList').innerHTML = htmlDone;
-      document.getElementById('log').innerText = `⚡ Успешно! Раунд ${currentLevel} пройден.`;
-      
-      if (successCount >= 10) {
-        setTimeout(() => {
-          showScreen('sVictory');
-        }, 1000);
-      } else {
-        currentLevel++;
-        setTimeout(() => {
-          startGameLoop();
-        }, 1200);
-      }
-    }, 500);
-  }
+    let gameActive, score, health, player, particles, enemies, items, frames, stars;
 
-  function triggerFail() {
-    isLocked = false;
-    document.getElementById('sGame').classList.remove('on');
-    document.getElementById('sFail').classList.add('on');
-  }
+    class Player {
+        constructor() {
+            this.width = 40;
+            this.height = 40;
+            this.x = canvas.width / 2 - 20;
+            this.y = canvas.height - 100;
+            this.targetX = this.x;
+            this.speed = 0.15; // Сглаживание движения
+            this.realityActive = 0; // Время действия Reality протокола
+        }
 
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-    document.getElementById(id).classList.add('on');
-  }
+        draw() {
+            ctx.save();
+            // Свечение игрока
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = this.realityActive > 0 ? '#00ff9f' : '#00f3ff';
+            
+            // Тело FastCon
+            ctx.fillStyle = this.realityActive > 0 ? '#00ff9f' : '#00f3ff';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Внутренний декор
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(this.x + 5, this.y + 5, this.width - 10, this.height - 10);
+            
+            ctx.restore();
+        }
 
-  function resetGame() {
-    currentLevel = 1;
-    successCount = 0;
-    document.getElementById('progressFill').style.width = '0%';
-    document.getElementById('progressText').innerText = `Обойдено блокировок: 0 / 10`;
-    showScreen('sGame');
-    startGameLoop();
-  }
+        update() {
+            this.x += (this.targetX - this.x) * this.speed;
+            if (this.realityActive > 0) this.realityActive--;
+        }
+    }
 
-  startGameLoop();
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = Math.random() * 4 - 2;
+            this.speedY = Math.random() * 4 - 2;
+            this.color = color;
+            this.life = 1.0;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.life -= 0.02;
+        }
+        draw() {
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.globalAlpha = 1.0;
+        }
+    }
 
-  const canvas = document.getElementById('bg');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  let lines = [];
-  
-  function initMatrix() {
-    lines = Array(Math.floor(canvas.width / 20)).fill(0);
-  }
-  initMatrix();
+    function spawnEnemy() {
+        const types = [
+            { name: 'DPI', color: '#ff0055', w: 60, h: 20, speed: 4 },
+            { name: 'IP-BAN', color: '#8a00ff', w: 30, h: 30, speed: 6 },
+            { name: 'RKN-WALL', color: '#ff0055', w: 120, h: 15, speed: 3 }
+        ];
+        if (frames % Math.max(10, 40 - Math.floor(score/5)) === 0) {
+            let type = types[Math.floor(Math.random() * types.length)];
+            enemies.push({
+                ...type,
+                x: Math.random() * (canvas.width - type.w),
+                y: -50
+            });
+        }
+    }
 
-  function draw() {
-    ctx.fillStyle = 'rgba(10, 11, 16, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00f3ff';
-    ctx.font = '14px monospace';
-    lines.forEach((y, x) => {
-      ctx.fillText(String.fromCharCode(33 + Math.random() * 93), x * 20, y);
-      if (y > canvas.height && Math.random() > 0.975) {
-        lines[x] = 0;
-      } else {
-        lines[x] = y + 15;
-      }
+    function spawnItem() {
+        if (frames % 60 === 0) {
+            const isPowerup = Math.random() > 0.9;
+            items.push({
+                x: Math.random() * (canvas.width - 20),
+                y: -30,
+                size: 15,
+                speed: 3,
+                type: isPowerup ? 'REALITY' : 'DATA',
+                color: isPowerup ? '#00ff9f' : '#fff'
+            });
+        }
+    }
+
+    function init() {
+        gameActive = true;
+        score = 0;
+        health = 100;
+        frames = 0;
+        player = new Player();
+        particles = [];
+        enemies = [];
+        items = [];
+        stars = Array.from({length: 50}, () => ({
+            x: Math.random() * canvas.width, 
+            y: Math.random() * canvas.height, 
+            s: Math.random() * 2
+        }));
+        
+        overlay.style.display = 'none';
+        scoreEl.innerText = "0.00 GB";
+        healthEl.innerText = "100%";
+        animate();
+    }
+
+    function drawStars() {
+        ctx.fillStyle = '#111';
+        stars.forEach(s => {
+            ctx.fillRect(s.x, s.y, s.s, s.s);
+            s.y += (s.s + 1);
+            if (s.y > canvas.height) s.y = -10;
+        });
+    }
+
+    function animate() {
+        if (!gameActive) return;
+        ctx.fillStyle = 'rgba(5, 5, 5, 0.3)'; // Эффект хвоста (motion blur)
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawStars();
+        frames++;
+
+        player.update();
+        player.draw();
+
+        // Частицы за игроком (инверсионный след)
+        if (frames % 2 === 0) {
+            particles.push(new Particle(player.x + player.width/2, player.y + player.height, '#00f3ff'));
+        }
+
+        // Обновление врагов
+        enemies.forEach((en, i) => {
+            en.y += en.speed;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = en.color;
+            ctx.fillStyle = en.color;
+            ctx.fillRect(en.x, en.y, en.w, en.h);
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px Orbitron';
+            ctx.fillText(en.name, en.x + 5, en.y + 15);
+
+            // Коллизия с игроком
+            if (player.realityActive <= 0 &&
+                player.x < en.x + en.w && player.x + player.width > en.x &&
+                player.y < en.y + en.h && player.y + player.height > en.y) {
+                
+                health -= 20;
+                enemies.splice(i, 1);
+                healthEl.innerText = health + "%";
+                for(let j=0; j<10; j++) particles.push(new Particle(player.x, player.y, '#ff0055'));
+                
+                if (health <= 0) {
+                    gameActive = false;
+                    overlay.style.display = 'flex';
+                    document.getElementById('final-stats').innerText = `SAVED DATA: ${(score * 0.12).toFixed(2)} GB`;
+                }
+            }
+            if (en.y > canvas.height) enemies.splice(i, 1);
+        });
+
+        // Обновление предметов
+        items.forEach((it, i) => {
+            it.y += it.speed;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = it.color;
+            ctx.fillStyle = it.color;
+            ctx.beginPath();
+            ctx.arc(it.x + 7, it.y + 7, it.size/2, 0, Math.PI*2);
+            ctx.fill();
+
+            if (player.x < it.x + it.size && player.x + player.width > it.x &&
+                player.y < it.y + it.size && player.y + player.height > it.y) {
+                
+                if (it.type === 'REALITY') {
+                    player.realityActive = 300; // 5 секунд неуязвимости
+                } else {
+                    score++;
+                    scoreEl.innerText = (score * 0.12).toFixed(2) + " GB";
+                }
+                items.splice(i, 1);
+                for(let j=0; j<8; j++) particles.push(new Particle(it.x, it.y, it.color));
+            }
+            if (it.y > canvas.height) items.splice(i, 1);
+        });
+
+        // Частицы
+        particles.forEach((p, i) => {
+            p.update();
+            p.draw();
+            if (p.life <= 0) particles.splice(i, 1);
+        });
+
+        spawnEnemy();
+        spawnItem();
+        requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        player.targetX = e.clientX - rect.left - player.width / 2;
     });
-    requestAnimationFrame(draw);
-  }
-  draw();
-  
-  window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initMatrix();
-  });
+
+    // Для мобилок
+    canvas.addEventListener('touchmove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        player.targetX = e.touches[0].clientX - rect.left - player.width / 2;
+        e.preventDefault();
+    }, {passive: false});
+
+    init();
 </script>
 </body>
 </html>
